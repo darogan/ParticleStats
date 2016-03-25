@@ -140,7 +140,7 @@ if((int(options.Squares) != 4) and (int(options.Squares) != 1) and \
 	      "Must be 4,16,64,256,1024 or 4096"
         sys.exit(0)
 
-if( int(options.Orient != 0) and int(options.Orient != 90) )
+if( (int(options.Orient) != 0) and (int(options.Orient) != 90) ):
 	print "ERROR: orientation must be either 0 or 90"
 	sys.exit(0)
 
