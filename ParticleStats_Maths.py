@@ -40,11 +40,10 @@ import numpy as na
 import os,sys,math
 from decimal import *
 import random
-#import Scientific.Statistics as SciPy
-#import scipy
+import Scientific.Statistics as SciPy
+import scipy
 #from Scientific.Geometry import Vector
-from Scientific import Vector
-#from Scientific.Geometry.VectorModule import Vector 
+from Scientific.Geometry.VectorModule import Vector 
 import ParticleStats_Outputs as PS_Outputs
 #import rpy
 #from rpy import r

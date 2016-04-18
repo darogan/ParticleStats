@@ -167,6 +167,8 @@ AxisLabels = str(options.AxisLabels)
 
 #AxesLabels = [ "D","V","A","P" ]
 
+DPI=str(250)
+
 FontSize_Titles = 2
 FontSize_Text   = 1
 if(options.OutputType == "html"):
@@ -524,7 +526,7 @@ SVGTrailPlot_1 = PS_Plots.PlotSVGTrails_1(OutName,O_Name,Coords,Colours,\
                                           Axis,Factor,FinalIMSize,Polygon,options.ROIColour)
 print " + SVGTrailPlot_1   =", os.path.basename(SVGTrailPlot_1+".svg")
 convert = "inkscape --export-png="+SVGTrailPlot_1+\
-          ".png --export-dpi=125 "+SVGTrailPlot_1+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+SVGTrailPlot_1+".svg 2>/dev/null"
 os.popen(convert)
 print " + SVGTrailPlot_1   =", os.path.basename(SVGTrailPlot_1+".png")
 
@@ -545,7 +547,7 @@ else:
 
 print " + SVGTrailPlot_2   =", os.path.basename(SVGTrailPlot_2+".svg")
 convert = "inkscape --export-png="+SVGTrailPlot_2+\
-          ".png --export-dpi=125 "+SVGTrailPlot_2+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+SVGTrailPlot_2+".svg 2>/dev/null"
 os.popen(convert)
 print " + SVGTrailPlot_2   =", os.path.basename(SVGTrailPlot_2+".png")
 
@@ -559,7 +561,7 @@ print " + Time Interval    =", options.TimeInterval
 SVGWindMapKey = PS_Plots.PlotWindMapKey(OutName,[100,100],AxisColours)
 print " + SVGWindMapKey    =", os.path.basename(SVGWindMapKey+".svg")
 convert = "inkscape --export-png="+SVGWindMapKey+\
-          ".png --export-dpi=125 "+SVGWindMapKey+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+SVGWindMapKey+".svg 2>/dev/null"
 print " + SVGWindMapKey    =", os.path.basename(SVGWindMapKey+".png")
 
 SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
@@ -573,7 +575,7 @@ SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
 					  options.ShowRectangles,options.ROIColour)
 print " + SVGWindMap num   =", os.path.basename(SVGWindMap_1+".svg")
 convert = "inkscape --export-png="+SVGWindMap_1+\
-          ".png --export-dpi=125 "+SVGWindMap_1+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+SVGWindMap_1+".svg 2>/dev/null"
 os.popen(convert)
 print " + SVGGWindMap num   =", os.path.basename(SVGWindMap_1+".png")
 
@@ -588,7 +590,7 @@ SVGWindMap_2  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           options.ShowRectangles,options.ROIColour)
 print " + SVGWindMap mag   =", os.path.basename(SVGWindMap_2+".svg")
 convert = "inkscape --export-png="+SVGWindMap_2+\
-          ".png --export-dpi=125 "+SVGWindMap_2+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+SVGWindMap_2+".svg 2>/dev/null"
 os.popen(convert)
 print " + SVGGWindMap  mag =", os.path.basename(SVGWindMap_2+".png")
 
@@ -597,7 +599,7 @@ print " + SVGGWindMap  mag =", os.path.basename(SVGWindMap_2+".png")
 #RadialHistogram = PS_Plots.PlotRadialHistogram(OutName,TrailVectors,500,AxisColours)
 #print " + RadialHistogram  =", RadialHistogram+".svg"
 #convert = "inkscape --export-png="+RadialHistogram+\
-#          ".png --export-dpi=125 "+RadialHistogram+".svg 2>/dev/null"
+#          ".png --export-dpi="+DPI+" "+RadialHistogram+".svg 2>/dev/null"
 #os.popen(convert)
 #print " + RadialHistogram  =", RadialHistogram+".png"
 
@@ -616,7 +618,7 @@ RoseDiagram      = PS_Plots.PlotRoseDiagram(OutName,"_rosediagram_15seg_wmag",\
 					    AxisColours,options.ScaleRose,AxisLabels)
 print " + RoseDiagram      =", os.path.basename(RoseDiagram+".svg")
 convert = "inkscape --export-png="+RoseDiagram+\
-          ".png --export-dpi=125 "+RoseDiagram+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+RoseDiagram+".svg 2>/dev/null"
 os.popen(convert)
 print " + RoseDiagram      =", os.path.basename(RoseDiagram+".png")
 
@@ -627,7 +629,7 @@ RoseDiagram2      = PS_Plots.PlotRoseDiagram(OutName,"_rosediagram_15seg_nomag",
 					     AxisColours,options.ScaleRose,AxisLabels)
 print " + RoseDiagram2     =", os.path.basename(RoseDiagram2+".svg")
 convert = "inkscape --export-png="+RoseDiagram2+\
-          ".png --export-dpi=125 "+RoseDiagram2+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+RoseDiagram2+".svg 2>/dev/null"
 os.popen(convert)
 print " + RoseDiagram2     =", os.path.basename(RoseDiagram2+".png")
 
@@ -636,7 +638,7 @@ RoseDiagram5      = PS_Plots.PlotRoseDiagram(OutName,"_rosediagram_180seg_nomag"
                                              AxisColours,options.ScaleRose,AxisLabels)
 print " + RoseDiagram5     =", os.path.basename(RoseDiagram5+".svg")
 convert = "inkscape --export-png="+RoseDiagram5+\
-          ".png --export-dpi=125 "+RoseDiagram5+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+RoseDiagram5+".svg 2>/dev/null"
 os.popen(convert)
 print " + RoseDiagram5     =", os.path.basename(RoseDiagram5+".png")
 
@@ -645,7 +647,7 @@ RoseDiagram5b     = PS_Plots.PlotRoseDiagram(OutName,"_rosediagram_180seg_wmag",
                                              AxisColours,options.ScaleRose,AxisLabels)
 print " + RoseDiagram5b    =", os.path.basename(RoseDiagram5b+".svg")
 convert = "inkscape --export-png="+RoseDiagram5b+\
-          ".png --export-dpi=125 "+RoseDiagram5b+".svg 2>/dev/null"
+          ".png --export-dpi="+DPI+" "+RoseDiagram5b+".svg 2>/dev/null"
 os.popen(convert)
 print " + RoseDiagram5b    =", os.path.basename(RoseDiagram5b+".png")
 
@@ -662,7 +664,7 @@ if options.Polygon and len(TrailVectors_ROI_Culled) > 0:
 						     AxisColours,options.ScaleRose,AxisLabels)
 	print " + RoseDiagram3a    =", os.path.basename(RoseDiagram3a+".svg")
 	convert = "inkscape --export-png="+RoseDiagram3a+\
-	          ".png --export-dpi=125 "+RoseDiagram3a+".svg 2>/dev/null"
+	          ".png --export-dpi="+DPI+" "+RoseDiagram3a+".svg 2>/dev/null"
 	os.popen(convert)
 	print " + RoseDiagram3a    =", os.path.basename(RoseDiagram3a+".png")
 
@@ -671,7 +673,7 @@ if options.Polygon and len(TrailVectors_ROI_Culled) > 0:
 						     AxisColours,options.ScaleRose,AxisLabels)
 	print " + RoseDiagram4a    =", os.path.basename(RoseDiagram4a+".svg")
 	convert = "inkscape --export-png="+RoseDiagram4a+\
-	          ".png --export-dpi=125 "+RoseDiagram4a+".svg 2>/dev/null"
+	          ".png --export-dpi="+DPI+" "+RoseDiagram4a+".svg 2>/dev/null"
 	os.popen(convert)
 	print " + RoseDiagram4a    =", os.path.basename(RoseDiagram4a+".png")
 
@@ -680,7 +682,7 @@ if options.Polygon and len(TrailVectors_ROI_Culled) > 0:
                                                      AxisColours,options.ScaleRose,AxisLabels)
         print " + RoseDiagram3b    =", os.path.basename(RoseDiagram3b+".svg")
         convert = "inkscape --export-png="+RoseDiagram3b+\
-                  ".png --export-dpi=125 "+RoseDiagram3b+".svg 2>/dev/null"
+                  ".png --export-dpi="+DPI+" "+RoseDiagram3b+".svg 2>/dev/null"
         os.popen(convert)
         print " + RoseDiagram3b    =", os.path.basename(RoseDiagram3b+".png")
 
@@ -689,7 +691,7 @@ if options.Polygon and len(TrailVectors_ROI_Culled) > 0:
                                                      AxisColours,options.ScaleRose,AxisLabels)
         print " + RoseDiagram4b    =", os.path.basename(RoseDiagram4b+".svg")
         convert = "inkscape --export-png="+RoseDiagram4b+\
-                  ".png --export-dpi=125 "+RoseDiagram4b+".svg 2>/dev/null"
+                  ".png --export-dpi="+DPI+" "+RoseDiagram4b+".svg 2>/dev/null"
         os.popen(convert)
         print " + RoseDiagram4b    =", os.path.basename(RoseDiagram4b+".png")
 

@@ -42,7 +42,7 @@ import random
 import numpy as na
 import os,sys,math,re
 #import Numeric
-#import scipy
+import scipy
 #from ParticleStats_Maths import *
 import ParticleStats_Maths   as PS_Maths
 import ParticleStats_Outputs as PS_Outputs
@@ -76,7 +76,7 @@ def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY,Orient ):
 		im2 = im2.transpose(Image.FLIP_TOP_BOTTOM)
 
 	if( int(AxisAngle) > 0):
-		im2 = im2.rotate(AxisAngle)-Orient
+		im2 = im2.rotate(AxisAngle-Orient)
 
 
 	im2.save(OutName+".tif","TIFF")
