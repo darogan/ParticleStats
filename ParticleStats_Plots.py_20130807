@@ -42,7 +42,7 @@ import random
 import numpy as na
 import os,sys,math,re
 #import Numeric
-#import scipy
+import scipy
 #from ParticleStats_Maths import *
 import ParticleStats_Maths   as PS_Maths
 import ParticleStats_Outputs as PS_Outputs
@@ -58,7 +58,7 @@ import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
 
 
 #------------------------------------------------------------------------------
-def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY,Orient ):
+def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY ):
 # Function to create PNG and TIFF images of the original image 
 # Created 20/05/08
 # Modifies 230608 to take account of rotation offset of image
@@ -76,7 +76,7 @@ def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY,Orient ):
 		im2 = im2.transpose(Image.FLIP_TOP_BOTTOM)
 
 	if( int(AxisAngle) > 0):
-		im2 = im2.rotate(AxisAngle)-Orient
+		im2 = im2.rotate(AxisAngle-90)	
 
 
 	im2.save(OutName+".tif","TIFF")
@@ -971,8 +971,7 @@ def PlotRoseDiagram ( OutName,Label,TrailVectors,Mag,StepAng,FinalIMSize,\
 			Scale       = 1		
 
 			if(ScalePie):
-				#Scale = int(  100 / ScaleFactor )
-				Scale = 3
+				Scale = int(  100 / ScaleFactor )
 
 			Radius = Radius * Scale
 
@@ -991,9 +990,9 @@ def PlotRoseDiagram ( OutName,Label,TrailVectors,Mag,StepAng,FinalIMSize,\
                 elif( Angle[i] >= 315 and Angle[i] <= 360):
                         gradient = "gradwhite2"+str(AxisColour[0])
 
-		if (StepAng > 45) and (Angle[i] < 180):
+		if (StepAng >= 45) and (Angle[i] < 180):
 			gradient = "gradwhite2"+str(AxisColour[1])
-		elif (StepAng > 45) and (Angle[i] >= 180):
+		elif (StepAng >= 45) and (Angle[i] >= 180):
                         gradient = "gradwhite2"+str(AxisColour[3])
 
 
@@ -1355,93 +1354,6 @@ def PlotDirectionTable ( TrailVectors ):
 
 	return Table
 
-
-#------------------------------------------------------------------------------
-def PlotVertDirectionTable ( TrailVectors ):
-
-        Table = 0
-
-        Step = 45
-        Angle  = []
-        Directionality = []
-        i = 0
-        while i < 360:
-                Angle.append( i )
-                Directionality.append( 0 )
-                i += Step
-
-        i = 0
-        while i < len(Angle):
-                j = 0
-                while j < len(TrailVectors):
-                        Ang = PS_Maths.CalculateVectorAngle( TrailVectors[j] )
-
-                        if( Ang >= Angle[i] and Ang < (Angle[i]+Step) ):
-                                Directionality[i] += 1
-                        j += 1
-                i += 1
-
-        print "+------------+-------------------+"
-        i = 0
-        while i < len(Angle):
-                DirPercent = 100*(float(Directionality[i])/float(sum(Directionality)))
-                print "| %3d to %3d | %6.2f%s (%3d/%3d) |"%(Angle[i], Angle[i]+Step,\
-                                                           DirPercent,"%",Directionality[i],\
-                                                           sum(Directionality))
-                i += 1
-        print "+------------+-------------------+"
-        i = 0
-        while i < len(Angle):
-                DirPercent = 100*(float(Directionality[i]+Directionality[i+1])/float(sum(Directionality)))
-                print "| %3d to %3d | %6.2f%s (%3d/%3d) |"%(Angle[i], Angle[i]+(2*Step),\
-                                                            DirPercent, "%", \
-                                                            Directionality[i]+Directionality[i+1],\
-                                                            sum(Directionality))
-                i += 2
-        print "+------------+-------------------+"
-
-        i = 0
-        while i < len(Angle):
-                DirPercent = 100*(float(Directionality[i]+Directionality[i+1]+\
-                             Directionality[i+2]+Directionality[i+3])/float(sum(Directionality)))
-                print "| %3d to %3d | %6.2f%s (%3d/%3d) |"%(Angle[i], Angle[i]+(4*Step),\
-                                                            DirPercent, "%", \
-                                                            Directionality[i]+Directionality[i+1]+\
-                                                            Directionality[i+2]+Directionality[i+3],\
-                                                            sum(Directionality))
-                i += 4
-        print "+------------+-------------------+"
-        print "| 315 to  45 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[-1]+Directionality[0])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[-1]+Directionality[0],\
-                                                   sum(Directionality))
-        print "|  45 to 135 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[1]+Directionality[2])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[1]+Directionality[2],\
-                                                   sum(Directionality))
-        print "| 135 to 225 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[3]+Directionality[4])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[3]+Directionality[4],\
-                                                   sum(Directionality))
-        print "| 225 to 315 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[5]+Directionality[6])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[5]+Directionality[6],\
-                                                   sum(Directionality))
-        print "+------------+-------------------+"
-
-        print "| 270 to 90 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[-2]+Directionality[-1]+Directionality[0]+Directionality[1])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[-2]+Directionality[-1]+Directionality[0]+Directionality[1],\
-                                                   sum(Directionality))
-	print "| 90 to 270 | %6.2f%s (%3d/%3d) |"%(100*(float(Directionality[2]+Directionality[3]+Directionality[4]+Directionality[5])/\
-                                                   float(sum(Directionality))),\
-                                                   "%",Directionality[2]+Directionality[3]+Directionality[4]+Directionality[5],\
-                                                   sum(Directionality))
-
-        print "+------------+-------------------+"
-
-	return Table
-
 #------------------------------------------------------------------------------
 def PlotKymoSpeedCompare (AveSpeeds,SheetNames,FullColours,OutDir):
 
@@ -1703,10 +1615,7 @@ def PlotTrailMagnitudes( OutName, TrailVectors, pixStep, AxisLabels ):
 
 	i = 0
 	while i < len(yAll):
-
-#np.zeros((5,), dtype=numpy.int)
-
-		Freqs = na.zeros(binNo,dtype=na.int)
+		Freqs = na.zeros(binNo,na.Int)
 		j = 0
 		while j < len(yAll[i]):
 			c = 0; k = 0
@@ -1789,7 +1698,7 @@ def PlotRunsFreq (Runs,Colours,Name,DirGraphs):
 			j += 1
 		i += 1
 
-	ys = na.sort(y)
+	ys = y.sort() #sort(y)
 
 	i = 0
 	factor = 20
@@ -1831,7 +1740,7 @@ def PlotDirChangeResults(Changes,CoordSet,DirGraphs):
         params = {'axes.labelsize':2,'text.fontsize':2,\
                   'xtick.labelsize':8,'ytick.labelsize':2}
 
-        ys     = na.sort(Changes)
+        ys     = na.sort(Changes) #Numeric.sort(Changes)
         factor = 1 #max(ys)/20.0
         freq   = zeros( (int(ys[-1]/factor)+1)  )
 
@@ -1875,42 +1784,6 @@ def PlotDirChangeResults(Changes,CoordSet,DirGraphs):
         return "DirChangesFreq_"+str(CoordSet)
 
 #------------------------------------------------------------------------------
-def PlotTrailSpeeds(OutName,TrailVectors,TrailNoPoints,TimeInt):
-
-        figure()
-        params = {'axes.labelsize':2,'text.fontsize':2,\
-                  'xtick.labelsize':8,'ytick.labelsize':2}
-
-	t = []
-	d = []
-	s = []
-
-	i = 0
-	while i < len(TrailVectors):
-		t.append( TrailNoPoints[i]*TimeInt )
-		d.append( PS_Maths.CalculateVectorMagnitude(TrailVectors[i]) )
-		s.append( d[-1]/t[-1] )
-		#print "--------", t[-1], d[-1], s[-1]
-		i += 1
-	
-        ss = na.sort(s)
-	AveSpd = float( sum(ss) ) / len(ss)
-
-	pylab.hist(ss,bins=20)
-
-        yticklabels = getp(gca(), 'yticklabels')
-        setp(yticklabels, 'color', 'black', fontsize=14)
-        xticklabels = getp(gca(), 'xticklabels')
-        setp(xticklabels, 'color', 'black', fontsize=14)
-        xlabel('Run Speeds')
-        ylabel('Freq')
-        title('Frequency Distribution of Trail Speeds')
-        savefig(OutName+'_trailspeeds.png',dpi=100)
-        savefig(OutName+'_trailspeeds.svg',dpi=350)
-
-        return(OutName+"_trailspeeds",AveSpd)
-
-#------------------------------------------------------------------------------
 def PlotThreeFrameResults(Runs,CoordSet,DirGraphs):
 
         figure()
@@ -1924,7 +1797,8 @@ def PlotThreeFrameResults(Runs,CoordSet,DirGraphs):
         	        y.append( Runs[i][4] )
                 i += 1
 
-        ys     = na.sort(y)
+        ys     = na.sort(y) #Numeric.sort(y)
+
         factor = 0.5 #max(ys)/20.0
         freq   = zeros( int(int(ys[-1]/factor)+1)  )
 
@@ -1982,7 +1856,7 @@ def PlotThreeFrameMaxResults(Runs,CoordSet,DirGraphs):
                         y.append( Runs[i][4] )
                 i += 1
 
-        ys     = na.sort(y)
+        ys     = na.sort(y) #Numeric.sort(y)
         factor = 0.5 #max(ys)/20.0
         freq   = zeros( (int(ys[-1]/factor)+1)  )
 

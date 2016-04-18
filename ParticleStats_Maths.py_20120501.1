@@ -40,11 +40,9 @@ import numpy as na
 import os,sys,math
 from decimal import *
 import random
-#import Scientific.Statistics as SciPy
-#import scipy
+import Scientific.Statistics as SciPy
 #from Scientific.Geometry import Vector
-from Scientific import Vector
-#from Scientific.Geometry.VectorModule import Vector 
+from Scientific.Geometry.VectorModule import Vector 
 import ParticleStats_Outputs as PS_Outputs
 #import rpy
 #from rpy import r
@@ -53,7 +51,6 @@ import re
 #r.library("circular")
 #r.library("CircStats")
 import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr 
 import rpy2.rpy_classic as rpy
 
 
@@ -1461,7 +1458,7 @@ def FindLongMovementsAndPausesRaquel (Coords,Regression,Axes,PauseDef,\
 	else:
 		i = 0
 	        while i < len(Axes): 
-			#print "+++++++++++++++++", Axes[i][0]
+			print "+++++++++++++++++", Axes[i][0]
 
 			if Coords[0][0] == Axes[i][0]:
 				break
@@ -2512,6 +2509,8 @@ def Regression_CVersion (Coords,X,Y):
 #------------------------------------------------------------------------------
 def KymoRegression (Coords,X,Y):
 
+	import re
+
 	x = []; y =[]
         Regression = {}
         i = 0
@@ -2521,16 +2520,34 @@ def KymoRegression (Coords,X,Y):
                 i += 1
 
 	r = robjects.r
-	robjects.globalenv["roX"] = robjects.FloatVector( x )                
-	robjects.globalenv["roY"] = robjects.FloatVector( y )
+	roX = robjects.FloatVector( x )
+	roY = robjects.FloatVector( y )
+	robjects.globalEnv["roX"] = roX
+	robjects.globalEnv["roY"] = roY 
 
-        stats = importr('stats')                       
-        linear_model = stats.lm("roY ~ roX")           
+        rpy.set_default_mode(rpy.NO_CONVERSION)
+	linear_model = r.lm("roY ~ roX")
+        rpy.set_default_mode(rpy.BASIC_CONVERSION)
 
-        Regression['X']         = linear_model.rx2('coefficients')[1]
-        Regression['Intercept'] = linear_model.rx2('coefficients')[0]
-	Regression['R2']        = r.summary(linear_model)[7][0]
-	Regression['aR2']       = r.summary(linear_model)[8][0]
+	coefficients = linear_model.r['coefficients']
+	adjRval      = r.summary(linear_model)[8]
+	#regdata1 = re.findall(r'([-+]?\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?', str(coefficients) )
+	regdata1 = re.findall(r'([-+]?\d+\.\d*)', str(coefficients) )
+	#regdata2 = re.findall(r'(\d+\.\d*)', str(adjRval) )
+	regdata2 = re.findall(r'\d+(?:\.\d+)?', str(adjRval) )
+
+	if len(regdata1) > 1:
+		Regression['X']         = float(regdata1[1])
+	        Regression['Intercept'] = float(regdata1[0])
+	else:
+		Regression['X']         = 99 
+                Regression['Intercept'] = 99 
+	if len(regdata2) > 1:
+		Regression['R2']        = float(regdata2[1])
+                Regression['aR2']       = float(regdata2[1])
+	else:
+                Regression['R2']        = 0
+                Regression['aR2']       = 0
 
 	return Regression
 
