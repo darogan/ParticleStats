@@ -363,6 +363,7 @@ SquareLineVectorAngles   = []
 SquareLineVector         = []
 SquareBigVectorAngle     = []
 SquareBigVectorMagnitude = []
+SquareBigVectorSpeed     = []
 SqInROI = []
 
 i = 0
@@ -377,6 +378,7 @@ while i < Squares/Factor:
                 SquareLineVectorAngles.append( [cnt,0.0] )
                 SquareBigVectorAngle.append ( 0.0 )
                 SquareBigVectorMagnitude.append ( 0.0 )
+                SquareBigVectorSpeed.append( [0.0,0] )
 		SqInROI.append ( 0 )
                 cnt += 1
                 j += 1
@@ -455,6 +457,9 @@ while i < len(TrailsAll):
 	                                                     Line[0][1]-Line[1][1]] )]
 	                        SquareBigVector[j][0]     = SquareBigVector[j][0]+\
 	                                                    (Line[1][0]-Line[0][0])
+
+                                SquareBigVectorSpeed[j][0] = SquareBigVectorSpeed[j][0] + ( TrailNoPoints[i]*float(options.TimeInterval) )
+                                SquareBigVectorSpeed[j][1] = SquareBigVectorSpeed[j][1] + ( PS_Maths.CalculateVectorMagnitude(TrailVectors[i]) ) 
 
 				#Corrects for whether moving up or down on Y
 				if Line[0][1] > Line[1][1]:
@@ -554,7 +559,6 @@ print " + SVGTrailPlot_2   =", os.path.basename(SVGTrailPlot_2+".png")
 print " + TrailSpeeds Plot =", TrailSpeedPlot, "(.png & .svg)"
 print " + Ave Trail Speed  =", AveSpd
 print " + Time Interval    =", options.TimeInterval
-
 
 
 #Draw the BASIC WindMap
