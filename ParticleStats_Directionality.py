@@ -461,7 +461,7 @@ while i < len(TrailsAll):
                                 SquareBigVectorSpeed[j][0] = SquareBigVectorSpeed[j][0] + ( TrailNoPoints[i]*float(options.TimeInterval) )
                                 SquareBigVectorSpeed[j][1] = SquareBigVectorSpeed[j][1] + ( PS_Maths.CalculateVectorMagnitude(TrailVectors[i]) ) 
 
-                                print "i=", i, " j=",j, "SquareBigVectorSpeed=[",SquareBigVectorSpeed[j][0],",",SquareBigVectorSpeed[j][1], "]"
+                                print "i=", i, " j=",j, "SquareBigVectorSpeed=[",SquareBigVectorSpeed[j][0],",",SquareBigVectorSpeed[j][1], "] Speed=", (SquareBigVectorSpeed[j][0] / SquareBigVectorSpeed[j][1])
 
 				#Corrects for whether moving up or down on Y
 				if Line[0][1] > Line[1][1]:
