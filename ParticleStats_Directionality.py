@@ -102,9 +102,12 @@ parser.add_option("--ArrowColour", metavar="COLOUR",
 parser.add_option("--SquareColours", metavar="COLOUR",
                   dest="SquareColours", default="angle",
                   help="Colour specification for the windmap square colours [angle|speed]: DEFAULT=angle")
-parser.add_option("--SquareColoursSpeedRange", metavar="COLOUR",
-                  dest="SquareColoursSpeedRange", default="50",
-                  help="WindMap: An integer range to define 10 different colours within the range 0-[50]: DEFAULT=50")
+parser.add_option("--SquareColoursSpeedRangeMin", metavar="SPEEDRANGEMIN",
+                  dest="SquareColoursSpeedRangeMin", default="5",
+                  help="WindMap: An integer range to define minimum speed to scale: DEFAULT=5")
+parser.add_option("--SquareColoursSpeedRangeMax", metavar="SPEEDRANGEMAX",
+                  dest="SquareColoursSpeedRangeMiax", default="20",
+                  help="WindMap: An integer range to define maximum speed to scale: DEFAULT=20")
 parser.add_option("--ROIColour", metavar="COLOUR",
                   dest="ROIColour", default="white",
                   help="Colour specification for the ROI: DEFAULT=white")
@@ -155,9 +158,13 @@ if options.SquareColours != "angle" and options.SquareColours != "speed":
 	sys.exit(0)
 
 
-SquareColoursSpeedRange = int(options.SquareColoursSpeedRange)
-if SquareColoursSpeedRange < 0 or SquareColoursSpeedRange > 200:
-        print "ERROR: the wind map speed range is outside of the allowed range 1..200"
+SquareColoursSpeedRangeMin = int(options.SquareColoursSpeedRangeMin)
+if SquareColoursSpeedRangeMin < 0 or SquareColoursSpeedRangeMin > 200:
+        print "ERROR: the wind map speed min range is outside of the allowed range 1..200"
+        sys.exit(0)
+SquareColoursSpeedRangeMax = int(options.SquareColoursSpeedRangeMax)
+if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
+        print "ERROR: the wind map speed max range is outside of the allowed range 1..200"
         sys.exit(0)
 
 ###############################################################################
@@ -599,7 +606,7 @@ SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-					  SquareBigVectorSpeed,\
+					  SquareBigVectorSpeedMin,SquareBigVectorSpeedMax,\
 					  "num",SquareNoLines,FinalIMSize,\
 					  AxisColours,options.SquareColours,\
 					  SquareColoursSpeedRange,options.ShowArrows,\
@@ -616,7 +623,7 @@ SVGWindMap_2  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-					  SquareBigVectorSpeed,\
+					  SquareBigVectorSpeed,SquareBigVectorSpeedMax,\
                                           "mag",SquareNoLines,FinalIMSize,
 					  AxisColours,options.SquareColours,\
 					  SquareColoursSpeedRange,options.ShowArrows,\

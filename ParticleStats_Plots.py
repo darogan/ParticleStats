@@ -438,7 +438,8 @@ def PlotSVGWindMap_1 (OutName,O_Name,X,Y,Factor,Polygon,SquareCoords,\
 		      SquareBigVector,SquareBigVectorAngle,\
 		      SquareBigVectorMagnitudeLongest,SquareBigVectorSpeed,\
 		      OpacityMethod,SquareNoLines,\
-		      FinalIMSize,AxisColours,SquareColours,SquareColoursSpeedRange,\
+		      FinalIMSize,AxisColours,SquareColours,\
+                      SquareColoursSpeedRangeMin,SquareColoursSpeedRangeMax,\
 		      ShowArrows,ArrowColour,ShowGrid,ShowRectangles,PolygonColour):
 # Function to create SVG images displaying the wind map
 #  
@@ -468,13 +469,13 @@ def PlotSVGWindMap_1 (OutName,O_Name,X,Y,Factor,Polygon,SquareCoords,\
 				(R,G,B) = PS_Maths.ColourBasedOnAngleSelector(\
                 	                         PS_Maths.CalculateVectorAngle(SquareBigVector[i]),AxisColours)
 			elif(SquareColours == "speed"):
-				SquareColoursSpeedRangeMax = 15
-				SquareColoursSpeedRangeMin = 10
-				step    = 255/SquareColoursSpeedRangeMax
+				#SquareColoursSpeedRangeMax = 15
+				#SquareColoursSpeedRangeMin = 10
+				step    = 255/(SquareColoursSpeedRangeMax-SquareColoursSpeedRangeMin)
 				speed   = (SquareBigVectorSpeed[i][0]/SquareBigVectorSpeed[i][1])/SquareColoursSpeedRangeMax
-				grade   = int(step*speed)
+				grade   = 2*int(step/speed)
 				print "Square=", i, " Step=", step, " Speed=", speed, " grade=", grade
-				(R,G,B) = (grade,125,125)
+				(R,G,B) = (grade,0,0)
 
 			if OpacityMethod == "num":
 				H = SquareNoLines[i] * (float(175) / float(max(SquareNoLines))) 
