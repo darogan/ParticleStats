@@ -436,15 +436,16 @@ def PlotBinaryWindMap_1 (FileName,OutName,X,Y,AxisAngle,\
 #------------------------------------------------------------------------------
 def PlotSVGWindMap_1 (OutName,O_Name,X,Y,Factor,Polygon,SquareCoords,\
 		      SquareBigVector,SquareBigVectorAngle,\
-		      SquareBigVectorMagnitudeLongest,OpacityMethod,SquareNoLines,\
-		      FinalIMSize,AxisColours,\
+		      SquareBigVectorMagnitudeLongest,SquareBigVectorSpeed,\
+		      OpacityMethod,SquareNoLines,\
+		      FinalIMSize,AxisColours,SquareColours,SquareColoursSpeedRange,\
 		      ShowArrows,ArrowColour,ShowGrid,ShowRectangles,PolygonColour):
 # Function to create SVG images displaying the wind map
 #  
 # Created 19/05/08
 # Modified 260608 to take new rotated image data - 800x800 image
 
-	OutName = OutName+"_windmap_"+OpacityMethod
+	OutName = OutName+"_windmap_"+OpacityMethod+"_"+SquareColours
         scene = Scene(OutName,FinalIMSize,FinalIMSize)
 
 	LineW = (X/Factor)/16
@@ -459,12 +460,22 @@ def PlotSVGWindMap_1 (OutName,O_Name,X,Y,Factor,Polygon,SquareCoords,\
         scene.add( SVGImage(FinalIMSize,FinalIMSize,O_Name+"_"+\
                             str(int(Factor*Factor))+"_original.png") )
 
-
 	i = 0
         while i < len(SquareCoords):
                 if (SquareBigVector[i][0] != 0 or SquareBigVector[i][1] != 0):
-			(R,G,B) = PS_Maths.ColourBasedOnAngleSelector(\
-                                         PS_Maths.CalculateVectorAngle(SquareBigVector[i]),AxisColours)
+
+			if (SquareColours == "angle"):
+				(R,G,B) = PS_Maths.ColourBasedOnAngleSelector(\
+                	                         PS_Maths.CalculateVectorAngle(SquareBigVector[i]),AxisColours)
+			elif(SquareColours == "speed"):
+				SquareColoursSpeedRangeMax = 15
+				SquareColoursSpeedRangeMin = 10
+				step    = 255/SquareColoursSpeedRangeMax
+				speed   = (SquareBigVectorSpeed[i][0]/SquareBigVectorSpeed[i][1])/SquareColoursSpeedRangeMax
+				grade   = int(step*speed)
+				print "Square=", i, " Step=", step, " Speed=", speed, " grade=", grade
+				(R,G,B) = (grade,125,125)
+
 			if OpacityMethod == "num":
 				H = SquareNoLines[i] * (float(175) / float(max(SquareNoLines))) 
 			elif OpacityMethod == "mag":

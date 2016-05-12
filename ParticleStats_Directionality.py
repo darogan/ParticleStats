@@ -99,6 +99,12 @@ parser.add_option("-c", "--arrows",
 parser.add_option("--ArrowColour", metavar="COLOUR",
                   dest="ArrowColour", default="white",
                   help="Colour specification for the arrows: DEFAULT=white")
+parser.add_option("--SquareColours", metavar="COLOUR",
+                  dest="SquareColours", default="angle",
+                  help="Colour specification for the windmap square colours [angle|speed]: DEFAULT=angle")
+parser.add_option("--SquareColoursSpeedRange", metavar="COLOUR",
+                  dest="SquareColoursSpeedRange", default="50",
+                  help="WindMap: An integer range to define 10 different colours within the range 0-[50]: DEFAULT=50")
 parser.add_option("--ROIColour", metavar="COLOUR",
                   dest="ROIColour", default="white",
                   help="Colour specification for the ROI: DEFAULT=white")
@@ -143,6 +149,16 @@ if((int(options.Squares) != 4) and (int(options.Squares) != 1) and \
 if( (int(options.Orient) != 0) and (int(options.Orient) != 90) ):
 	print "ERROR: orientation must be either 0 or 90"
 	sys.exit(0)
+
+if options.SquareColours != "angle" and options.SquareColours != "speed":
+	print "ERROR: SquareColours is not set to the allowed options of angle or speed"
+	sys.exit(0)
+
+
+SquareColoursSpeedRange = int(options.SquareColoursSpeedRange)
+if SquareColoursSpeedRange < 0 or SquareColoursSpeedRange > 200:
+        print "ERROR: the wind map speed range is outside of the allowed range 1..200"
+        sys.exit(0)
 
 ###############################################################################
 # LOAD IN THE REQUIRED MODULES ONLY AFTER MAIN USER OPTIONS CHECKED
@@ -465,7 +481,11 @@ while i < len(TrailsAll):
                                 #
                                 # Additions Here
                                 #
-                                print "i=", i, " j=",j, "SquareBigVectorSpeed=[",SquareBigVectorSpeed[j][0],",",SquareBigVectorSpeed[j][1], "] Speed=", (SquareBigVectorSpeed[j][0] / SquareBigVectorSpeed[j][1])
+                                #print "i=", i, " j=",j, "SquareBigVectorSpeed=[",SquareBigVectorSpeed[j][0],",",SquareBigVectorSpeed[j][1], "] Speed=", (SquareBigVectorSpeed[j][0] / SquareBigVectorSpeed[j][1])
+
+				print "\t+ Trail ", i+1, "\tCrosses Square", j+1,\
+                                      "(Square Coords=", SquareCoords[j], \
+                                      ")[Cummulative Speed=", (SquareBigVectorSpeed[j][0] / SquareBigVectorSpeed[j][1]),"]"
 
 				#Corrects for whether moving up or down on Y
 				if Line[0][1] > Line[1][1]:
@@ -579,8 +599,10 @@ SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-					  "num",SquareNoLines,\
-                                          FinalIMSize,AxisColours,options.ShowArrows,\
+					  SquareBigVectorSpeed,\
+					  "num",SquareNoLines,FinalIMSize,\
+					  AxisColours,options.SquareColours,\
+					  SquareColoursSpeedRange,options.ShowArrows,\
 					  options.ArrowColour,options.ShowGrid,\
 					  options.ShowRectangles,options.ROIColour)
 print " + SVGWindMap num   =", os.path.basename(SVGWindMap_1+".svg")
@@ -594,8 +616,10 @@ SVGWindMap_2  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-                                          "mag",SquareNoLines,\
-                                          FinalIMSize,AxisColours,options.ShowArrows,\
+					  SquareBigVectorSpeed,\
+                                          "mag",SquareNoLines,FinalIMSize,
+					  AxisColours,options.SquareColours,\
+					  SquareColoursSpeedRange,options.ShowArrows,\
                                           options.ArrowColour,options.ShowGrid,\
                                           options.ShowRectangles,options.ROIColour)
 print " + SVGWindMap mag   =", os.path.basename(SVGWindMap_2+".svg")
