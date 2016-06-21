@@ -48,7 +48,7 @@ setup(
 	license = 'GPLv2',
 	packages = ['ParticleStats'],
 	#py_modules=[ "ParticleStats_Inputs.py", "ParticleStats_Maths.py", "ParticleStats_Outputs.py", "ParticleStats_Plots.py", "ParticleStats_RandomTrailGenerator.py", "ParticleStats_Vectors.py", "Test_Interactive_OSX_DivideUpLines.py", "Test_Interactive_OSX.py", "Test_Interactive.py" ],
-	scripts=[ "scripts/ParticleStats_TrackCompare.py", "scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py" ],
+	scripts=["scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py" ],
 	ext_modules = [module1],
 	package_data={
 		'ParticleStats': [
