@@ -34,7 +34,7 @@
 from distutils.core import setup, Extension
 
 module1 = Extension('ParticleStats_linRegressFit',
-                    sources = ['ParticleStats_linRegressFit.c'])
+                    sources = ['src/ParticleStats_linRegressFit.c'])
 
 
 setup(
