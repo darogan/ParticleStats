@@ -46,7 +46,7 @@ use POSIX;
 my( $q, $Upload, $Start, $uploaddir, $Process, $ExcelFile1, $ExcelFile2, 
     $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
     $NoFiles, $upload_FH1, $upload_FH2, $Track, $Runner,
-    $Step, $Remover, $DirRand, $Phase, $Phaser, $cgidir, $webspace,   );
+    $Remover, $DirRand, $Phaser, $cgidir, $webspace,   );
 
 ###############################################################################
 # Change the values in this section to configure the script for your server
@@ -74,8 +74,8 @@ else
 ###############################################################################
 
 $q = new CGI;
-$Phase       = $q->param('Phase');
-$Step        = $q->param('Step');
+my $Phase       = $q->param('Phase') // '';
+my $Step        = $q->param('Step') // '';
 $ExcelFile1  = $q->param("excel1");
 $ExcelFile2  = $q->param("excel2");
 $TiffFile1   = $q->param("tiff1");
