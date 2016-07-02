@@ -752,7 +752,7 @@ Analysis of the dynamics of separating kinetochores as displayed in kymographs<P
             "<TR HEIGHT=100 BGCOLOR=white>" . 
             "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. ParticleStats:Compare</TD>" .
             "<TD VALIGN=MIDDLE><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start'>" . 
-            "<IMG SRC='$webspace/Images/compare_logo_100px.png' BORDER=0></A></TD>" . 
+            "<IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>" .
             "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>" .
             "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>" . 
             "Compare Runs & Pauses from Tracked data</A></TD>" .
@@ -761,7 +761,7 @@ Analysis of the dynamics of separating kinetochores as displayed in kymographs<P
             "<TR HEIGHT=100 BGCOLOR=white>" . 
             "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. ParticleStats:Directionalityi</TD>" .
             "<TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start'>" . 
-            "<IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></A></TD>" .
+            "<IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>" .
             "<TD><FONT FACE='sans,arial' SIZE=2>" .
             "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>" . 
             "Analyse Directionality from Tracked data</TD>" .
@@ -770,7 +770,7 @@ Analysis of the dynamics of separating kinetochores as displayed in kymographs<P
             "<TR HEIGHT=100 BGCOLOR=white>" . 
             "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. ParticleStats:Kymographs</TD>" .
             "<TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start'>" .
-            "<IMG SRC='$webspace/Images/kymograph_logo_100px.png' BORDER=0></TD>" .
+            "<IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>" .
             "<TD><FONT FACE='sans,arial' SIZE=2>" .
             "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>" .
             "Analyse Data from Kymographs images</TD>" .
@@ -812,7 +812,7 @@ $Webpage .= "<BODY>" .
             "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
             "<TR><TD COLSPAN=1 ALIGN=left VALIGN=top width=250>" . 
             "<A HREF='http://www.ParticleStats.com'>" . 
-            "<IMG SRC='$webspace/Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>" .
+            "<IMG SRC='Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>" .
             "<FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
             "<B>Open source software for the analysis of intracellular " . 
             "particle motility and cytoskeletal polarity</B>" .
