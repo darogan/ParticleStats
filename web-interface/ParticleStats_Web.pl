@@ -69,14 +69,6 @@ else
   }
 
 
-#Find out the release dates of the 3 programs
-
-use File::stat;
-use Time::localtime;
-my $AgeDirectionality = ctime(stat('ParticleStats_Directionality.py')->mtime);
-
-
-
 ###############################################################################
 
 $q = new CGI;
@@ -752,9 +744,6 @@ The directionality of a set of tracked particles is determined using directional
 <I>ParticleStats:Kymographs:</I>
 Analysis of the dynamics of separating kinetochores as displayed in kymographs<P>" .
 
-#"The ParticleStats code was last updated on: $AgeDirectionality<P>" . 
-
-
             "<B>Please Select ParticleStats Program To Use:</B></TD></TR>" .
             "<TR><TD VALIGN=top ALIGN=center>" .
 
@@ -851,8 +840,6 @@ $Webpage .= "<P>$Output<P>" .
             "</TD></TR></TABLE>" . "<P>" .
 
             "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>" . 
-            "ParticleStats source code last updated on: $AgeDirectionality</TD></TR>" . 
             "<TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>" .
             "<A HREF='http://www.opensource.org/docs/definition.php'>" .
             "<IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png' " .
