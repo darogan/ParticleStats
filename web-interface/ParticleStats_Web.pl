@@ -46,7 +46,7 @@ use POSIX;
 my( $q, $Upload, $uploaddir, $Process, $ExcelFile1, $ExcelFile2,
     $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
     $NoFiles, $upload_FH1, $upload_FH2, $Track, $Runner,
-    $Remover, $DirRand, $Phaser, $cgidir, $webspace,   );
+    $Remover, $DirRand, $Phaser, $webspace,   );
 
 ###############################################################################
 # Change the values in this section to configure the script for your server
@@ -55,19 +55,16 @@ if($ENV{'HTTP_HOST'} =~ /idcws.bioch.ox.ac.uk/)
   {
     $uploaddir = "/home/rhamilto/public_html/ParticleStats2/PS_Out/";
     $webspace  = "http://idcws.bioch.ox.ac.uk/~rhamilto/ParticleStats2";
-    $cgidir    = "http://idcws.bioch.ox.ac.uk/cgi-particle2";
   }
 elsif($ENV{'HTTP_HOST'} =~ /simulans.bioch.ox.ac.uk/)
   {
     $uploaddir = "/home/particlestats/public_html/PS_Out/";
     $webspace  = "http://simulans.bioch.ox.ac.uk/~particlestats/";
-    $cgidir    = "http://simulans.bioch.ox.ac.uk/cgi-particle";
   }
 else 
   {
     $uploaddir = "/home/particlestats/public_html/PS_Out/";
     $webspace  = "http://idcn1.bioch.ox.ac.uk/~particlestats/";
-    $cgidir    = "http://idcn1.bioch.ox.ac.uk/cgi-particle";
   }
 
 
@@ -123,12 +120,11 @@ elsif( $Phase eq "Kymographs" and $Step eq "Run")
 else
   {
     $Phase = "Start";
-    Print_HTML (Start_Page ($cgidir));
+    Print_HTML (Start_Page ());
   }
 
 Tracker($Phase, $uploaddir);
 
-#------------------------------------------------------------------------------
 sub Tracker {
   my $Phase = shift;
   my $uploaddir = shift;
@@ -718,7 +714,7 @@ return $Output;
 
 sub Start_Page
 {
-  my $cgi_dir = shift;
+  my $cgi_url = CGI::url();
 
   return <<"END_HTML";
 <TABLE BGCOLOR='white' WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
@@ -741,28 +737,28 @@ sub Start_Page
 
     <TR HEIGHT=100 BGCOLOR=white>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. ParticleStats:Compare</TD>
-    <TD VALIGN=MIDDLE><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start'>
+    <TD VALIGN=MIDDLE><A HREF='$cgi_url?Phase=Compare&Step=Start'>
     <IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>
-    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    <A HREF='$cgi_url?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Compare Runs & Pauses from Tracked data</A></TD>
     </TR>
 
     <TR HEIGHT=100 BGCOLOR=white>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. ParticleStats:Directionalityi</TD>
-    <TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start'>
+    <TD><A HREF='$cgi_url?Phase=Directionality&Step=Start'>
     <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
-    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    <A HREF='$cgi_url?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Directionality from Tracked data</TD>
     </TR>
 
     <TR HEIGHT=100 BGCOLOR=white>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. ParticleStats:Kymographs</TD>
-    <TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start'>
+    <TD><A HREF='$cgi_url?Phase=Kymographs&Step=Start'>
     <IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
-    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    <A HREF='$cgi_url?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Data from Kymographs images</TD>
     </TR>
 
