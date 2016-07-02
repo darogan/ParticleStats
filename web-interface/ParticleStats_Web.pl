@@ -41,9 +41,11 @@ use CGI;
 use strict;
 use warnings;
 
+use POSIX;
+
 my( $q, $Upload, $Start, $uploaddir, $Process, $ExcelFile1, $ExcelFile2, 
     $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
-    $NoFiles, $upload_FH1, $upload_FH2, $date, $Track, $Runner, 
+    $NoFiles, $upload_FH1, $upload_FH2, $Track, $Runner,
     $Step, $Remover, $DirRand, $Phase, $Phaser, $cgidir, $webspace,   );
 
 ###############################################################################
@@ -85,70 +87,60 @@ $upload_FH4  = $q->upload("tiffcomp");
 
 my $Output;
 
-$date = `date +%F_%H%M`;
-chomp($date);
-
 if( $Phase eq "Directionality" and $Step eq "Start")
   {
     $Output = Directionality();
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML($Output,"green");
   }
 elsif( $Phase eq "Directionality" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH3,
                                  $ExcelFile1,$TiffFile1);
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML("$Output","green",$DirRand)
   }
 elsif ($Phase eq "Compare" and $Step eq "Start")
   {
     $Output = Compare();
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML($Output,"green");
   }
 elsif( $Phase eq "Compare" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH2,
                                  $ExcelFile1,$ExcelFile2);
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML("$Output","green",$DirRand)
   }
 elsif( $Phase eq "Kymographs" and $Step eq "Start")
   {
     $Output = Kymographs();
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML("$Output<P>","green");
   }
 elsif( $Phase eq "Kymographs" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH4,
                                  $ExcelFile1,$TiffFile2);
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML("$Output","green",$DirRand)
   }
 else
   {
     $Start = Start_Page($uploaddir);
     $Phase = "Start";
-    Tracker($Phase,$date,$uploaddir);
     Print_HTML($Start,"green");
   }
 
+Tracker($Phase, $uploaddir);
+
 #------------------------------------------------------------------------------
 sub Tracker {
+  my $Phase = shift;
+  my $uploaddir = shift;
 
-my ($Track,$Phase,$date,$uploaddir);
-
-$Phase     = $_[0];
-$date      = $_[1];
-$uploaddir = $_[2];
-
-$Track = sprintf("%-10s\t%25s\t%15s\t%s\n",
-                 $Phase, $date, $ENV{REMOTE_ADDR}, $ENV{HTTP_USER_AGENT});
-open(COUNTER,">>$uploaddir/Counter.text");
-print COUNTER "$Track";
-close COUNTER;
+  my $date = POSIX::strftime "%F_%H%M", localtime;
+  my $Track = sprintf("%-10s\t%25s\t%15s\t%s\n",
+                      $Phase, $date, $ENV{REMOTE_ADDR}, $ENV{HTTP_USER_AGENT});
+  open (my $counter, ">>", "$uploaddir/Counter.text")
+    or return; # Do not die just because we are unable to track stats.
+  print {$counter} "$Track";
+  close $counter;
 }
 
 #------------------------------------------------------------------------------
