@@ -846,7 +846,7 @@ $Webpage .= "<P>$Output<P>" .
             "border=0 width=72 height=60></a></TD>" .
             "<TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>GNU License<BR>" .
             "<A HREF='http://www.gnu.org'>" . 
-            "<IMG SRC='$webspace/Images/heckert_gnu.small.png' HEIGHT=60  BORDER=0></A>" .
+            "<IMG SRC='https://www.gnu.org/graphics/heckert_gnu.png' HEIGHT=60  BORDER=0></A>" .
             "</TD></TR></TABLE>";
 $Webpage .= "</BODY></HTML>";
 
