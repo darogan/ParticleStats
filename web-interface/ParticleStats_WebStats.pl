@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 ###############################################################################
 #        ____            _   _      _      ____  _        _                   #
 #       |  _ \ __ _ _ __| |_(_) ___| | ___/ ___|| |_ __ _| |_ ___             #
@@ -39,6 +39,7 @@
 use CGI;
 
 use strict;
+use warnings;
 
 my($uploaddir, $webspace, $cgidir, $AgeDirectionality, $date, $q, 
    $url, @CounterData, $i, $Webpage, $Output,@TempCounterData, 

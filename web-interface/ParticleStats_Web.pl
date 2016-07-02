@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 ###############################################################################
 #        ____            _   _      _      ____  _        _                   #
 #       |  _ \ __ _ _ __| |_(_) ___| | ___/ ___|| |_ __ _| |_ ___             #
@@ -39,6 +39,7 @@
 use CGI;
 
 use strict;
+use warnings;
 
 my( $q, $Upload, $Start, $uploaddir, $Process, $ExcelFile1, $ExcelFile2, 
     $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
