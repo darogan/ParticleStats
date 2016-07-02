@@ -42,14 +42,10 @@ use strict;
 use warnings;
 
 use POSIX;
+use File::Spec;
 
-my( $q, $Upload, $uploaddir, $Process, $ExcelFile1, $ExcelFile2,
-    $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
-    $NoFiles, $upload_FH1, $upload_FH2, $Track, $Runner,
-    $Remover, $DirRand, $Phaser, $webspace,   );
-
-###############################################################################
-# Change the values in this section to configure the script for your server
+my $uploaddir;
+my $webspace;
 
 if($ENV{'HTTP_HOST'} =~ /idcws.bioch.ox.ac.uk/)
   {
@@ -61,69 +57,12 @@ elsif($ENV{'HTTP_HOST'} =~ /simulans.bioch.ox.ac.uk/)
     $uploaddir = "/home/particlestats/public_html/PS_Out/";
     $webspace  = "http://simulans.bioch.ox.ac.uk/~particlestats/";
   }
-else 
+else
   {
     $uploaddir = "/home/particlestats/public_html/PS_Out/";
     $webspace  = "http://idcn1.bioch.ox.ac.uk/~particlestats/";
   }
 
-
-###############################################################################
-
-$q = new CGI;
-my $Phase       = $q->param('Phase') // '';
-my $Step        = $q->param('Step') // '';
-$ExcelFile1  = $q->param("excel1");
-$ExcelFile2  = $q->param("excel2");
-$TiffFile1   = $q->param("tiff1");
-$upload_FH1  = $q->upload("excel1");
-$upload_FH2  = $q->upload("excel2");
-$upload_FH3  = $q->upload("tiff1");
-$TiffFile2   = $q->param("tiffcomp");
-$upload_FH4  = $q->upload("tiffcomp");
-
-my $Output;
-
-if( $Phase eq "Directionality" and $Step eq "Start")
-  {
-    $Output = Directionality();
-    Print_HTML($Output);
-  }
-elsif( $Phase eq "Directionality" and $Step eq "Run")
-  {
-    ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH3,
-                                 $ExcelFile1,$TiffFile1);
-    Print_HTML("$Output", $DirRand)
-  }
-elsif ($Phase eq "Compare" and $Step eq "Start")
-  {
-    $Output = Compare();
-    Print_HTML($Output);
-  }
-elsif( $Phase eq "Compare" and $Step eq "Run")
-  {
-    ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH2,
-                                 $ExcelFile1,$ExcelFile2);
-    Print_HTML("$Output", $DirRand)
-  }
-elsif( $Phase eq "Kymographs" and $Step eq "Start")
-  {
-    $Output = Kymographs();
-    Print_HTML("$Output<P>",);
-  }
-elsif( $Phase eq "Kymographs" and $Step eq "Run")
-  {
-    ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH4,
-                                 $ExcelFile1,$TiffFile2);
-    Print_HTML("$Output", $DirRand)
-  }
-else
-  {
-    $Phase = "Start";
-    Print_HTML (Start_Page ());
-  }
-
-Tracker($Phase, $uploaddir);
 
 sub Tracker {
   my $Phase = shift;
@@ -138,402 +77,398 @@ sub Tracker {
   close $counter;
 }
 
-#------------------------------------------------------------------------------
-sub Uploader {
 
-my($Result, $File, $uploaddir, $upload_FH, $uploadrand );
+sub Uploader
+{
+  my $upload_FH  = shift;
+  my $File       = shift;
+  my $Directory  = shift;
+  my $fpath = File::Spec->catfile ($Directory, $File);
 
-$File       = $_[0];
-$uploaddir  = $_[1]; 
-$upload_FH  = $_[2];
-$uploadrand = $_[3];
+  if (($fpath =~ m/\.xls$/) or ($fpath =~ m/\.tiff?$/) or \
+      ($fpath =~ m/\.zip$/) or ($fpath =~ m/\.tar.gz$/))
+    {
+      open (UPLOADFILE, ">", $fpath) or die "dfsdfsdf: $!\n";
+      binmode UPLOADFILE;
 
-if (($File =~ m/\.xls\b/) or ($File =~ m/\.tif+\b/) or \
-    ($File =~ m/\.zip+\b/) or ($File =~ m/\.tar.gz+\b/))
-  {
-    open (UPLOADFILE, ">$uploaddir/$uploadrand/$File") || die "dfsdfsdf: $!\n";
-    binmode UPLOADFILE;
+      while ( <$upload_FH> )
+       {
+         print UPLOADFILE;
+       }
 
-    while ( <$upload_FH> )
-     {
-       print UPLOADFILE;
-     }
-
-    close UPLOADFILE;
-
-    $Result = 1;
-  }
-return $Result;
+      close UPLOADFILE;
+    }
+  return;
 }
 
-#------------------------------------------------------------------------------
-sub Process {
 
-my ($Command, $Phase, $Result, $Output, $ExcelFile1, $ExcelFile2, $uploaddir, 
-    $upload_FH1, $upload_FH2, @Opts, @chars, $Directory, %Opts, $Error, 
-    $Runner, $ExtraOptions, $ROI, );
+sub Process
+{
+  my $Phase = shift;
+  my $q = shift;
+  my $uploaddir = shift;
 
-$uploaddir =  $_[0];
-$Phase     = $q->param('Phase');
+  my @chars     = ( "A" .. "Z", "a" .. "z", 0 .. 9);
+  my $Directory = join("", @chars[ map { rand @chars } ( 1 .. 20 ) ]);
+  my $upload_path = File::Spec->catfile ($uploaddir, $Directory);
 
-@chars     = ( "A" .. "Z", "a" .. "z", 0 .. 9);
-$Directory = join("", @chars[ map { rand @chars } ( 1 .. 20 ) ]);
-`mkdir $uploaddir/$Directory`;
-`chmod -R 777 $uploaddir/$Directory`;
+  `mkdir $upload_path`;
+  `chmod -R 777 $upload_path`;
 
-if( $Phase eq "Compare" )
-  {
-    $upload_FH1 =  $_[1];
-    $upload_FH2 =  $_[2];
-    $ExcelFile1 =  $_[3];
-    $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
-    $ExcelFile2 =  $_[4];
-    $ExcelFile2 =~ s/.*[\/\\](.*)/$1/;
+  my $Command;
+  if( $Phase eq "Compare" )
+    {
+      my $ExcelFile1  = $q->param("excel1");
+      $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
+      my $ExcelFile2  = $q->param("excel2");
+      $ExcelFile2 =~ s/.*[\/\\](.*)/$1/;
 
+      if($q->param('OPT_Example') !~ m/on/)
+        {
+          Uploader ($q->upload("excel1"), $ExcelFile1, $upload_path);
+          Uploader ($q->upload("excel2"), $ExcelFile2, $upload_path);
+        }
 
-    if($q->param('OPT_Example') !~ m/on/)
-      {
-        $Result = Uploader($ExcelFile1,$uploaddir,$upload_FH1,$Directory);
-        $Result = Uploader($ExcelFile2,$uploaddir,$upload_FH2,$Directory);
-      }
+      my %Opts;
+      if($q->param('OPT_Trails')     =~ m/on/) { $Opts{'OPT_Trails'}     = "-t"; }
+      if($q->param('OPT_Graphs')     =~ m/on/) { $Opts{'OPT_Graphs'}     = "-g"; }
+      if($q->param('OPT_Regression') =~ m/on/) { $Opts{'OPT_Regression'} = "-r"; }
+      if($q->param('OPT_Example')    =~ m/on/) { $Opts{'OPT_Example'}    = "1"; }
 
-    if($q->param('OPT_Trails')     =~ m/on/) { $Opts{'OPT_Trails'}     = "-t"; }
-    if($q->param('OPT_Graphs')     =~ m/on/) { $Opts{'OPT_Graphs'}     = "-g"; }
-    if($q->param('OPT_Regression') =~ m/on/) { $Opts{'OPT_Regression'} = "-r"; }
-    if($q->param('OPT_Example')    =~ m/on/) { $Opts{'OPT_Example'}    = "1"; }
+      my $Error;
+      if($q->param('OPT_RunDistance') =~ m/[^0-9\.]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Run Distance Must Be a numerical value</FONT>";
+         return $Error; }
+      if($q->param('OPT_RunFrames') =~ m/[^0-9]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Run Frames must be an integer value</FONT>";
+         return $Error; }
+      if($q->param('OPT_PauseSpeed') =~ m/[^0-9\.]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Pause Speed Must Be a numerical value</FONT>";
+         return $Error; }
+      if($q->param('OPT_PauseFrames') =~ m/[^0-9]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Pause Frames must be an integer value</FONT>";
+         return $Error; }
+      if($q->param('OPT_PauseDistance') =~ m/[^0-9\.]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Pause Distance Must Be a numerical value</FONT>";
+         return $Error; }
+      if($q->param('OPT_PauseDuration') =~ m/[^0-9]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Pause Duration Must Be a numerical value</FONT>";
+         return $Error; }
+      if($q->param('OPT_Pixels') =~ m/[^0-9\.]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Pixels Must Be a numerical value</FONT>";
+         return $Error; }
+      if($q->param('OPT_Dimensions') =~ m/[^0-9A-Za-z]/) {
+         $Error = "<FONT FACE=sans,arial COLOR=red>" .
+                  "Error: Dimensions not 2D, 1DX, or 1DY</FONT>";
+         return $Error; }
 
-    if($q->param('OPT_RunDistance') =~ m/[^0-9\.]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Run Distance Must Be a numerical value</FONT>";
-       return $Error; }
-    if($q->param('OPT_RunFrames') =~ m/[^0-9]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Run Frames must be an integer value</FONT>";
-       return $Error; }
-    if($q->param('OPT_PauseSpeed') =~ m/[^0-9\.]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Pause Speed Must Be a numerical value</FONT>";
-       return $Error; }
-    if($q->param('OPT_PauseFrames') =~ m/[^0-9]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Pause Frames must be an integer value</FONT>";
-       return $Error; }
-    if($q->param('OPT_PauseDistance') =~ m/[^0-9\.]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Pause Distance Must Be a numerical value</FONT>";
-       return $Error; }
-    if($q->param('OPT_PauseDuration') =~ m/[^0-9]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Pause Duration Must Be a numerical value</FONT>";
-       return $Error; }
-    if($q->param('OPT_Pixels') =~ m/[^0-9\.]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Pixels Must Be a numerical value</FONT>";
-       return $Error; }
-    if($q->param('OPT_Dimensions') =~ m/[^0-9A-Za-z]/) {
-       $Error = "<FONT FACE=sans,arial COLOR=red>" .
-                "Error: Dimensions not 2D, 1DX, or 1DY</FONT>";
-       return $Error; }
+      my $ExtraOptions = $Opts{'OPT_Graphs'}     . " " .
+                      $Opts{'OPT_Trails'}     . " " .
+                      $Opts{'OPT_Regression'} . " " .
+                      "--rundistance="     . $q->param('OPT_RunDistance')   . " " .
+                      "--runframes="       . $q->param('OPT_RunFrames')     . " " .
+                      "--pausedistance="   . $q->param('OPT_PauseDistance') . " " .
+                      "--pauseduration="   . $q->param('OPT_PauseDuration') . " " .
+                      "--pausespeed="      . $q->param('OPT_PauseSpeed')    . " " .
+                      "--pauseframes="     . $q->param('OPT_PauseFrames')   . " " .
+                      "--pausedefinition=" . $q->param('OPT_Pauses')        . " " .
+                      "--timestart="       . $q->param('OPT_TimeStart')     . " " .
+                      "--timeend="         . $q->param('OPT_TimeEnd')       . " " .
+                      "--pixelratio="      . $q->param('OPT_Pixels')        . " " ;
 
-    $ExtraOptions = $Opts{'OPT_Graphs'}     . " " .
-                    $Opts{'OPT_Trails'}     . " " .
-                    $Opts{'OPT_Regression'} . " " .
-                    "--rundistance="     . $q->param('OPT_RunDistance')   . " " .
-                    "--runframes="       . $q->param('OPT_RunFrames')     . " " .
-                    "--pausedistance="   . $q->param('OPT_PauseDistance') . " " .
-                    "--pauseduration="   . $q->param('OPT_PauseDuration') . " " .
-                    "--pausespeed="      . $q->param('OPT_PauseSpeed')    . " " .
-                    "--pauseframes="     . $q->param('OPT_PauseFrames')   . " " .
-                    "--pausedefinition=" . $q->param('OPT_Pauses')        . " " .
-                    "--timestart="       . $q->param('OPT_TimeStart')     . " " .
-                    "--timeend="         . $q->param('OPT_TimeEnd')       . " " .
-                    "--pixelratio="      . $q->param('OPT_Pixels')        . " " ;
+      if($q->param('OPT_Example') =~ m/on/)
+        {
+          $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " .
+                     "-a $uploaddir/CompareExample_control.xls " .
+                     "-b $uploaddir/CompareExample_variant.xls " .
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
+        }
+      else
+        {
+          $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " . 
+                     "-a $upload_path/$ExcelFile1 -b $upload_path/$ExcelFile2 " . 
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
+        }
+    } 
+  elsif( $Phase eq "Directionality" )
+    {
+      my $ExcelFile1  = $q->param("excel1");
+      $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
+      my $TiffFile1   = $q->param("tiff1");
+      $TiffFile1  =~ s/.*[\/\\](.*)/$1/;
 
-    if($q->param('OPT_Example') =~ m/on/)
-      {
-        $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " .
-                   "-a $uploaddir/CompareExample_control.xls " .
-                   "-b $uploaddir/CompareExample_variant.xls " .
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
-      }
-    else
-      {
-        $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " . 
-                   "-a $uploaddir/$Directory/$ExcelFile1 -b $uploaddir/$Directory/$ExcelFile2 " . 
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
-      }
-  } 
-elsif( $Phase eq "Directionality" )
-  {
-    $upload_FH1 =  $_[1];
-    $upload_FH3 =  $_[2];
-    $ExcelFile1 =  $_[3];
-    $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
-    $TiffFile1  =  $_[4];
-    $TiffFile1  =~ s/.*[\/\\](.*)/$1/;
+      my $ExtraOptions = "";
 
-    $ExtraOptions = "";
- 
-    if($q->param('OPT_ROI'))
-      { 
-        $ROI = $q->param('OPT_ROI');
-        open(ROI,">$uploaddir/$Directory/polygon.text");
-        print ROI $ROI;
-        close ROI;
-	$ExtraOptions .= " -p $uploaddir/$Directory/polygon.text ";
-      }
+      if($q->param('OPT_ROI'))
+        {
+          my $ROI = $q->param('OPT_ROI');
+          open(ROI,">$upload_path/polygon.text");
+          print ROI $ROI;
+          close ROI;
+          $ExtraOptions .= " -p $upload_path/polygon.text ";
+        }
 
-    if($q->param('OPT_Example') !~ m/on/)
-      {
-        $Result = Uploader($ExcelFile1,$uploaddir,$upload_FH1,$Directory);
-        $Result = Uploader($TiffFile1,$uploaddir,$upload_FH3,$Directory);
-      }
+      if($q->param('OPT_Example') !~ m/on/)
+        {
+          Uploader ($q->upload("excel1"), $ExcelFile1, $upload_path);
+          Uploader ($q->upload("tiff1"), $TiffFile1, $upload_path);
+        }
 
-    if($q->param('OPT_AxisRotate') =~ m/on/) { $ExtraOptions .= " -a "; }
-    if($q->param('OPT_ShowGrid') =~ m/on/) { $ExtraOptions .= " -g "; }
-    if($q->param('OPT_ShowRectangles') =~ m/on/) { $ExtraOptions .= " -r "; }
-    if($q->param('OPT_ShowArrows') =~ m/on/) { $ExtraOptions .= " -c "; }
-    if($q->param('OPT_ScaleRose') =~ m/on/) { $ExtraOptions .= " --scalerose "; }
+      if($q->param('OPT_AxisRotate') =~ m/on/) { $ExtraOptions .= " -a "; }
+      if($q->param('OPT_ShowGrid') =~ m/on/) { $ExtraOptions .= " -g "; }
+      if($q->param('OPT_ShowRectangles') =~ m/on/) { $ExtraOptions .= " -r "; }
+      if($q->param('OPT_ShowArrows') =~ m/on/) { $ExtraOptions .= " -c "; }
+      if($q->param('OPT_ScaleRose') =~ m/on/) { $ExtraOptions .= " --scalerose "; }
 
-    if($q->param('OPT_Example') =~ m/on/)
-      {
-        $Command = "python ParticleStats_Directionality.py " . 
-                   "-x $uploaddir/DirectionalityExample.xls " .
-                   "-i $uploaddir/DirectionalityExample.tif -s " . $q->param('OPT_Squares') . 
-                   " --ArrowColour " . $q->param('OPT_ArrowColour') .
-                   " --ROIColour " . $q->param('OPT_ROIColour') .
-                   " --AxisLabels=" . $q->param('OPT_AxisLabels') .
-                   " $ExtraOptions -o html " .  
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
-      }
-    else
-      {
-        $Command = "python ParticleStats_Directionality.py " . 
-                   "-x $uploaddir/$Directory/$ExcelFile1 " . 
-                   "-i $uploaddir/$Directory/$TiffFile1 -s " . $q->param('OPT_Squares') . 
-                   " --ArrowColour=" . $q->param('OPT_ArrowColour') .
-                   " --ROIColour=" . $q->param('OPT_ROIColour') .
-		   " --AxisLabels=" . $q->param('OPT_AxisLabels') .
-                   " $ExtraOptions -o html " .  
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
-      }
-  }
-elsif( $Phase eq "Kymographs" )
-  {
-    $upload_FH1 =  $_[1];
-    $upload_FH4 =  $_[2];
-    $ExcelFile1 =  $_[3];
-    $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
-    $TiffFile2  =  $_[4];
-    $TiffFile2  =~ s/.*[\/\\](.*)/$1/;
+      if($q->param('OPT_Example') =~ m/on/)
+        {
+          $Command = "python ParticleStats_Directionality.py " . 
+                     "-x $uploaddir/DirectionalityExample.xls " .
+                     "-i $uploaddir/DirectionalityExample.tif -s " . $q->param('OPT_Squares') . 
+                     " --ArrowColour " . $q->param('OPT_ArrowColour') .
+                     " --ROIColour " . $q->param('OPT_ROIColour') .
+                     " --AxisLabels=" . $q->param('OPT_AxisLabels') .
+                     " $ExtraOptions -o html " .  
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
+        }
+      else
+        {
+          $Command = "python ParticleStats_Directionality.py " . 
+                     "-x $upload_path/$ExcelFile1 " . 
+                     "-i $upload_path/$TiffFile1 -s " . $q->param('OPT_Squares') . 
+                     " --ArrowColour=" . $q->param('OPT_ArrowColour') .
+                     " --ROIColour=" . $q->param('OPT_ROIColour') .
+                     " --AxisLabels=" . $q->param('OPT_AxisLabels') .
+                     " $ExtraOptions -o html " .  
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
+        }
+    }
+  elsif( $Phase eq "Kymographs" )
+    {
+      my $ExcelFile1  = $q->param("excel1");
+      $ExcelFile1 =~ s/.*[\/\\](.*)/$1/;
+      my $TiffFile2   = $q->param("tiffcomp");
+      $TiffFile2  =~ s/.*[\/\\](.*)/$1/;
 
-    if($q->param('OPT_Example') !~ m/on/)
-      {
-        $Result = Uploader($ExcelFile1,$uploaddir,$upload_FH1,$Directory);
-        $Result = Uploader($TiffFile2,$uploaddir,$upload_FH4,$Directory);
-      }
-    if($q->param('OPT_Example') =~ m/on/)
-      {
-	`unzip $uploaddir/KymographExample.zip -d $uploaddir/$Directory`;
-      }
+      if($q->param('OPT_Example') !~ m/on/)
+        {
+          Uploader ($q->upload("excel1"), $ExcelFile1, $upload_path);
+          Uploader ($q->upload("tiffcomp"), $TiffFile2, $upload_path);
+        }
+      if($q->param('OPT_Example') =~ m/on/)
+        {
+          `unzip $uploaddir/KymographExample.zip -d $upload_path`;
+        }
 
-    if( ($TiffFile2 =~ m/\.zip\b/) and ($q->param('OPT_Example') !~ m/on/) )
-      {
-        `unzip $uploaddir/$Directory/$TiffFile2 -d $uploaddir/$Directory`;
-      }
-    elsif($TiffFile2 =~ m/\.tar.gz\b/)
-     {
-        `tar -zxvf $uploaddir/$Directory/$TiffFile2 --directory $uploaddir/$Directory`;
-     }
+      if( ($TiffFile2 =~ m/\.zip\b/) and ($q->param('OPT_Example') !~ m/on/) )
+        {
+          `unzip $upload_path/$TiffFile2 -d $upload_path`;
+        }
+      elsif($TiffFile2 =~ m/\.tar.gz\b/)
+       {
+          `tar -zxvf $upload_path/$TiffFile2 --directory $upload_path`;
+       }
 
-    if($q->param('OPT_Example') =~ m/on/)
-      {
-        $Command = "python ParticleStats_Kymographs.py -x $uploaddir/KymographExample.xls " .
-                   "--tiffdir=$uploaddir/$Directory/ " .
-                   "-n " . $q->param('OPT_Noise') . " " .
-                   "-t " . $q->param('OPT_Threshold') . " " .
-                   "--speed_start=" . $q->param('OPT_TimeStart') . " " .
-                   "--speed_end=" . $q->param('OPT_TimeEnd') . " " .
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/ -o html";
-      }
-    else
-      {
-        $Command = "python ParticleStats_Kymographs.py -x $uploaddir/$Directory/$ExcelFile1 " . 
-                   "--tiffdir=$uploaddir/$Directory/ " .
-                   "-n " . $q->param('OPT_Noise') . " " . 
-                   "-t " . $q->param('OPT_Threshold') . " " .
-                   "--speed_start=" . $q->param('OPT_TimeStart') . " " .
-                   "--speed_end=" . $q->param('OPT_TimeEnd') . " " .
-                   "--outdir=PS_Out/$Directory/ --outhtml=$webspace/ -o html";
-      }
-  }
+      if($q->param('OPT_Example') =~ m/on/)
+        {
+          $Command = "python ParticleStats_Kymographs.py -x $uploaddir/KymographExample.xls " .
+                     "--tiffdir=$upload_path/ " .
+                     "-n " . $q->param('OPT_Noise') . " " .
+                     "-t " . $q->param('OPT_Threshold') . " " .
+                     "--speed_start=" . $q->param('OPT_TimeStart') . " " .
+                     "--speed_end=" . $q->param('OPT_TimeEnd') . " " .
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/ -o html";
+        }
+      else
+        {
+          $Command = "python ParticleStats_Kymographs.py -x $upload_path/$ExcelFile1 " . 
+                     "--tiffdir=$upload_path/ " .
+                     "-n " . $q->param('OPT_Noise') . " " . 
+                     "-t " . $q->param('OPT_Threshold') . " " .
+                     "--speed_start=" . $q->param('OPT_TimeStart') . " " .
+                     "--speed_end=" . $q->param('OPT_TimeEnd') . " " .
+                     "--outdir=PS_Out/$Directory/ --outhtml=$webspace/ -o html";
+        }
+    }
+  else
+    {
+      die "This is not a valid ParticleStats process step";
+    }
 
-$ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
-$ENV{'MATPLOTLIBDATA'} = $uploaddir;
-$ENV{'MATPLOTLIBRC'} = '/usr/share/matplotlib/';
-$ENV{'HOME'} = $uploaddir;
+  $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  $ENV{'MATPLOTLIBDATA'} = $uploaddir;
+  $ENV{'MATPLOTLIBRC'} = '/usr/share/matplotlib/';
+  $ENV{'HOME'} = $uploaddir;
 
-$Runner = `$Command`;
+  my $Runner = `$Command`;
 
-$Runner =~ s/<HTML>.*<BODY>//s;
-$Runner =~ s/Loading.*\n//g;
-$Runner =~ s/RHOME.*\n//;
-$Runner =~ s/RVERSION.*\n//g;
-$Runner =~ s/RVER.*\n//g;
-$Runner =~ s/RUSER.*\n//g;
-$Runner =~ s/Creating.*\n//g;
-$Runner =~ s/<\/BODY>.*\n//;
-$Runner =~ s/<\/HTML>//;
+  $Runner =~ s/<HTML>.*<BODY>//s;
+  $Runner =~ s/Loading.*\n//g;
+  $Runner =~ s/RHOME.*\n//;
+  $Runner =~ s/RVERSION.*\n//g;
+  $Runner =~ s/RVER.*\n//g;
+  $Runner =~ s/RUSER.*\n//g;
+  $Runner =~ s/Creating.*\n//g;
+  $Runner =~ s/<\/BODY>.*\n//;
+  $Runner =~ s/<\/HTML>//;
 
-$Output = "<TABLE WIDTH=800 BGCOLOR=white " . 
-          "STYLE='border:1px;border-style:dashed;border-color:grey;'>" .
-          "<TR><TD COLSPAN=1><FONT FACE='sans,arial' SIZE=2>" .
-          "<B>ParticleStats results link and command</B></TD></TR>" .
-          "<TR><TD><FONT FACE='sans,arial' SIZE=2>" .
-          "<B>Static link available for 1 week</B>:<BR>" .
-          "<A HREF='$webspace/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
-          "$webspace/PS_Out/$Directory</A>" .
-          "<P><B>Command Line Given</B>:<BR>" .
-          "<FONT FACE=courier SIZE=1>$Command</TD></TR>" .
-          "<TR><TD VALIGN=top COLSPAN=1>" . $Runner . "</TD></TR></TABLE>";
+  my $Output = "<TABLE WIDTH=800 BGCOLOR=white " . 
+            "STYLE='border:1px;border-style:dashed;border-color:grey;'>" .
+            "<TR><TD COLSPAN=1><FONT FACE='sans,arial' SIZE=2>" .
+            "<B>ParticleStats results link and command</B></TD></TR>" .
+            "<TR><TD><FONT FACE='sans,arial' SIZE=2>" .
+            "<B>Static link available for 1 week</B>:<BR>" .
+            "<A HREF='$webspace/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
+            "$webspace/PS_Out/$Directory</A>" .
+            "<P><B>Command Line Given</B>:<BR>" .
+            "<FONT FACE=courier SIZE=1>$Command</TD></TR>" .
+            "<TR><TD VALIGN=top COLSPAN=1>" . $Runner . "</TD></TR></TABLE>";
 
-return($Output, $Directory);
+  return ($Output, $Directory);
 }
 
-#------------------------------------------------------------------------------
-sub Directionality {
+sub Directionality
+{
+  return <<"END_HTML";
+<FORM ACTION='ParticleStats_Web.pl' METHOD='post' ENCTYPE='multipart/form-data'>
+<INPUT TYPE='HIDDEN' NAME='Phase' VALUE='Directionality'>
+<INPUT TYPE='HIDDEN' NAME='Step' VALUE='Run'>
 
-$Output  = "\n<FORM ACTION='ParticleStats_Web.pl' METHOD='post' ENCTYPE='multipart/form-data'>" .
-           "\n<INPUT TYPE='HIDDEN' NAME='Phase' VALUE='Directionality'>" .
-           "\n<INPUT TYPE='HIDDEN' NAME='Step' VALUE='Run'>";
+<TABLE WIDTH=800 BGCOLOR=white STYLE='border:1px;border-style:dashed;border-color:grey'>
+<TR><TD COLSPAN=2 VALIGN=top>
 
-$Output .= "\n<TABLE WIDTH=800 BGCOLOR=white " . 
-           "STYLE='border:1px;border-style:dashed;border-color:grey'>";
-$Output .= "<TR><TD COLSPAN=2 VALIGN=top>";
+<FONT FACE='sans,arial' SIZE=3><B>ParticleStats:Directionality:</B><P ALIGN=justify>
+<FONT FACE='sans,arial' SIZE=2>
+Select an excel file with particle coordinates and an example image from an image stack. Ideally the images will be in 8-bit TIFF format, however JPEG,GIF and PNG formats are accepted. Also select the number of the squares to perform the analysis, the more squares the finer the resolotion. If an orientation line has been provided for the particles/images then select this option for automatic rotation of the image and coordinates. To restric the analysis to a Region of Interest (ROI), input a seties of polygon points describing the ROI (e.g. 0 [368.0, 208.0])
+<P></TD></TR>
+<TR BGCOLOR=CC99CC>
+<TD VALIGN=top><FONT FACE='sans,arial' SIZE=2>Run example</TD>
+<TD><FONT FACE='sans,arial' SIZE=2><INPUT TYPE=CHECKBOX NAME='OPT_Example'> 
+Leave Excel and Tif Input fields blank<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The Example is a Drosophila oocyte tracking experiment from Parton <I>et al</I>, 2010, <I>In preparation</I><BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The two files can be downloaded <A HREF='$webspace/PS_Out/DirectionalityExample.xls' STYLE='TEXT-DECORATION: NONE'>[File 1]</A> 
+<A HREF='$webspace/PS_Out/DirectionalityExample.xls' STYLE='TEXT-DECORATION: NONE'>[File 2]</A><BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp To use the ROI feature cut & paste the coordinated from this file: <A HREF='$webspace/PS_Out/DirectionalityExample_polygon.txt' STYLE='TEXT-DECORATION: NONE'>[ROI]</A>
+     "<P>The example takes 2-3 minutes to run, so please be patient
+</TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Excel File to Upload</TD>
+<TD><INPUT SIZE=50 TYPE='file' NAME='excel1'></TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Image File to Upload</TD>
+<TD><INPUT SIZE=50 TYPE='file' NAME='tiff1'></TD></TR>
 
-$Output .= "<FONT FACE='sans,arial' SIZE=3><B>ParticleStats:Directionality:</B><P ALIGN=justify>" . 
-           "<FONT FACE='sans,arial' SIZE=2>" . 
-           "Select an excel file with particle coordinates and an example image from an image stack. Ideally the images will be in 8-bit TIFF format, however JPEG,GIF and PNG formats are accepted. Also select the number of the squares to perform the analysis, the more squares the finer the resolotion. If an orientation line has been provided for the particles/images then select this option for automatic rotation of the image and coordinates. To restric the analysis to a Region of Interest (ROI), input a seties of polygon points describing the ROI (e.g. 0 [368.0, 208.0])" .
-           "<P></TD></TR>".
-           "<TR BGCOLOR=CC99CC>" .
-           "<TD VALIGN=top><FONT FACE='sans,arial' SIZE=2>Run example</TD>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2><INPUT TYPE=CHECKBOX NAME='OPT_Example'> " .
-           "Leave Excel and Tif Input fields blank<BR>" .
-           "&nbsp&nbsp&nbsp&nbsp&nbsp The Example is a Drosophila oocyte tracking experiment from Parton <I>et al</I>, 2010, <I>In preparation</I><BR>" .
-           "&nbsp&nbsp&nbsp&nbsp&nbsp The two files can be downloaded <A HREF='$webspace/PS_Out/DirectionalityExample.xls' STYLE='TEXT-DECORATION: NONE'>[File 1]</A> " .
-           "<A HREF='$webspace/PS_Out/DirectionalityExample.xls' STYLE='TEXT-DECORATION: NONE'>[File 2]</A><BR>" .
-           "&nbsp&nbsp&nbsp&nbsp&nbsp To use the ROI feature cut & paste the coordinated from this file: <A HREF='$webspace/PS_Out/DirectionalityExample_polygon.txt' STYLE='TEXT-DECORATION: NONE'>[ROI]</A>" .
-	   "<P>The example takes 2-3 minutes to run, so please be patient" .
-           "</TD></TR>".
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>Excel File to Upload</TD>" .  
-           "<TD><INPUT SIZE=50 TYPE='file' NAME='excel1'></TD></TR>" .
-           "<TR BGCOLOR=whitesmoke>" . 
-           "<TD><FONT FACE='sans,arial' SIZE=2>Image File to Upload</TD>" . 
-           "<TD><INPUT SIZE=50 TYPE='file' NAME='tiff1'></TD></TR>";
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Number of Squares</FONT></TD>
+<TD><SELECT NAME='OPT_Squares'
+STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>
+<OPTION VALUE='1'>1
+<OPTION VALUE='4'>4
+<OPTION VALUE='16'>16
+<OPTION VALUE='64'>64
+<OPTION VALUE='256'>256
+<OPTION VALUE='1024'>1024
+</TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Axis Rotation</FONT></TD>
+<TD><INPUT TYPE=CHECKBOX NAME='OPT_AxisRotate' CHECKED></TD></TR>
 
-$Output .= "<TR BGCOLOR=whitesmoke>" . 
-           "<TD><FONT FACE='sans,arial' SIZE=2>Number of Squares</FONT></TD>" .
-           "<TD><SELECT NAME='OPT_Squares' " .
-           "STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>".
-           "<OPTION VALUE='1'>1\n" .
-           "<OPTION VALUE='4'>4\n"       . "<OPTION VALUE='16'>16\n" .
-           "<OPTION VALUE='64'>64\n"     . "<OPTION VALUE='256'>256\n" .
-           "<OPTION VALUE='1024'>1024\n" .
-           "</TD></TR>" .
-           "<TR BGCOLOR=whitesmoke>" . 
-           "<TD><FONT FACE='sans,arial' SIZE=2>Axis Rotation</FONT></TD>" .
-           "<TD><INPUT TYPE=CHECKBOX NAME='OPT_AxisRotate' CHECKED></TD></TR>" .           
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>Axis Labels</TD>
+<TD><INPUT TYPE='TEXT' NAME='OPT_AxisLabels' SIZE=6 VALUE='NSWE'
+STYLE='font-family:sans;font-size:10pt;color:black;
+background-color:whitesmoke'> <FONT FACE='sans,arial' SIZE=2 COLOR=black>
+<B>N</B>orth <B>S</B>outh <B>W</B>est <B>E</B>ast</TD></TR>
 
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>Axis Labels</TD>" .
-           "<TD><INPUT TYPE='TEXT' NAME='OPT_AxisLabels' SIZE=6 VALUE='NSWE' " .
-           "STYLE='font-family:sans;font-size:10pt;color:black;" .
-           "background-color:whitesmoke'> <FONT FACE='sans,arial' SIZE=2 COLOR=black>" . 
-           "<B>N</B>orth <B>S</B>outh <B>W</B>est <B>E</B>ast</TD></TR>" . 
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Show Arrows</FONT></TD>
+<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowArrows' CHECKED></TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Show Grid</FONT></TD>
+<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowGrid' CHECKED></TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Show Rectangles</FONT></TD>
+<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowRectangles' CHECKED></TD></TR>
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Scale Rose Diagrams</FONT></TD>
+<TD><INPUT TYPE=CHECKBOX NAME='OPT_ScaleRose' CHECKED></TD></TR>
 
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>Show Arrows</FONT></TD>" .
-           "<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowArrows' CHECKED></TD></TR>" .
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>Show Grid</FONT></TD>" .
-           "<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowGrid' CHECKED></TD></TR>" .
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>Show Rectangles</FONT></TD>" .
-           "<TD><INPUT TYPE=CHECKBOX NAME='OPT_ShowRectangles' CHECKED></TD></TR>" .
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>Scale Rose Diagrams</FONT></TD>" .
-           "<TD><INPUT TYPE=CHECKBOX NAME='OPT_ScaleRose' CHECKED></TD></TR>" .
-          
-           "<TR BGCOLOR=whitesmoke>" . 
-           "<TD><FONT FACE='sans,arial' SIZE=2>Arrow Colour</FONT></TD>" .
-           "<TD><SELECT NAME='OPT_ArrowColour' " .
-           "STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>".
-           "<OPTION VALUE='white'>white\n" .
-           "<OPTION VALUE='black'>black\n" .
-           "<OPTION VALUE='red'>red\n" .
-           "<OPTION VALUE='blue'>blue\n" .
-           "<OPTION VALUE='green'>green\n" .
-           "<OPTION VALUE='brown'>brown\n" .
-           "<OPTION VALUE='gold'>gold\n" .
-           "<OPTION VALUE='maroon'>maroon\n" .
-           "<OPTION VALUE='purple'>purple\n" .
-           "<OPTION VALUE='orange'>orange\n" .
-           "<OPTION VALUE='yellow'>yellow\n" .
-           "<OPTION VALUE='silver'>silver\n" .
-           "<OPTION VALUE='cyan'>cyan\n" .
-           "<OPTION VALUE='magenta'>magenta\n" .
-           "<OPTION VALUE='darkgreen'>darkgreen\n" .
-           "<OPTION VALUE='steelblue'>steelblue\n" .
-           "<OPTION VALUE='orchid'>orchid\n" .
-           "<OPTION VALUE='darkviolet'>darkviolet\n" .
-           "<OPTION VALUE='salmon'>salmon\n" .
-           "<OPTION VALUE='grey'>grey\n" .
-           "</TD></TR>" .
-          
-           "<TR BGCOLOR=whitesmoke>" .
-           "<TD><FONT FACE='sans,arial' SIZE=2>ROI Line Colour</FONT></TD>" .
-           "<TD><SELECT NAME='OPT_ROIColour' " .
-           "STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>".
-           "<OPTION VALUE='white'>white\n" .
-           "<OPTION VALUE='black'>black\n" .
-           "<OPTION VALUE='red'>red\n" .
-           "<OPTION VALUE='blue'>blue\n" .
-           "<OPTION VALUE='green'>green\n" .
-           "<OPTION VALUE='brown'>brown\n" .
-           "<OPTION VALUE='gold'>gold\n" .
-           "<OPTION VALUE='maroon'>maroon\n" .
-           "<OPTION VALUE='purple'>purple\n" .
-           "<OPTION VALUE='orange'>orange\n" .
-           "<OPTION VALUE='yellow'>yellow\n" .
-           "<OPTION VALUE='silver'>silver\n" .
-           "<OPTION VALUE='cyan'>cyan\n" .
-           "<OPTION VALUE='magenta'>magenta\n" .
-           "<OPTION VALUE='darkgreen'>darkgreen\n" .
-           "<OPTION VALUE='steelblue'>steelblue\n" .
-           "<OPTION VALUE='orchid'>orchid\n" .
-           "<OPTION VALUE='darkviolet'>darkviolet\n" .
-           "<OPTION VALUE='salmon'>salmon\n" .
-           "<OPTION VALUE='grey'>grey\n" .
-           "</TD></TR>" .
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>Arrow Colour</FONT></TD>
+<TD><SELECT NAME='OPT_ArrowColour'
+STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>
+<OPTION VALUE='white'>white
+<OPTION VALUE='black'>black
+<OPTION VALUE='red'>red
+<OPTION VALUE='blue'>blue
+<OPTION VALUE='green'>green
+<OPTION VALUE='brown'>brown
+<OPTION VALUE='gold'>gold
+<OPTION VALUE='maroon'>maroon
+<OPTION VALUE='purple'>purple
+<OPTION VALUE='orange'>orange
+<OPTION VALUE='yellow'>yellow
+<OPTION VALUE='silver'>silver
+<OPTION VALUE='cyan'>cyan
+<OPTION VALUE='magenta'>magenta
+<OPTION VALUE='darkgreen'>darkgreen
+<OPTION VALUE='steelblue'>steelblue
+<OPTION VALUE='orchid'>orchid
+<OPTION VALUE='darkviolet'>darkviolet
+<OPTION VALUE='salmon'>salmon
+<OPTION VALUE='grey'>grey
+</TD></TR>
 
-           "<TR BGCOLOR=whitesmoke>" . 
-           "<TD><FONT FACE='sans,arial' SIZE=2>ROI Polygon</FONT></TD>" .
-           "<TD><TEXTAREA NAME='OPT_ROI' ROWS=10 COLS=30 WRAP=hard  " .
-           "STYLE='font-size:8pt;color:black;background-color:white'></TEXTAREA></TD></TR>";
-           
-$Output .= "<TR BGCOLOR=whitesmoke><TD COLSPAN=2>" .
-           "<INPUT TYPE='submit' NAME='Submit' VALUE='Submit'>" . 
-           "<INPUT TYPE='reset' VALUE='Reset'>";
-$Output .= "</TR></TR></TABLE>";
-$Output .= "</FORM></FONT><P>";
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>ROI Line Colour</FONT></TD>
+<TD><SELECT NAME='OPT_ROIColour'
+STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>
+<OPTION VALUE='white'>white
+<OPTION VALUE='black'>black
+<OPTION VALUE='red'>red
+<OPTION VALUE='blue'>blue
+<OPTION VALUE='green'>green
+<OPTION VALUE='brown'>brown
+<OPTION VALUE='gold'>gold
+<OPTION VALUE='maroon'>maroon
+<OPTION VALUE='purple'>purple
+<OPTION VALUE='orange'>orange
+<OPTION VALUE='yellow'>yellow
+<OPTION VALUE='silver'>silver
+<OPTION VALUE='cyan'>cyan
+<OPTION VALUE='magenta'>magenta
+<OPTION VALUE='darkgreen'>darkgreen
+<OPTION VALUE='steelblue'>steelblue
+<OPTION VALUE='orchid'>orchid
+<OPTION VALUE='darkviolet'>darkviolet
+<OPTION VALUE='salmon'>salmon
+<OPTION VALUE='grey'>grey
+</TD></TR>
 
-return $Output;
+<TR BGCOLOR=whitesmoke>
+<TD><FONT FACE='sans,arial' SIZE=2>ROI Polygon</FONT></TD>
+<TD><TEXTAREA NAME='OPT_ROI' ROWS=10 COLS=30 WRAP=hard
+STYLE='font-size:8pt;color:black;background-color:white'></TEXTAREA></TD></TR>
+
+<TR BGCOLOR=whitesmoke><TD COLSPAN=2>
+<INPUT TYPE='submit' NAME='Submit' VALUE='Submit'>
+<INPUT TYPE='reset' VALUE='Reset'>
+</TR></TR></TABLE>
+</FORM></FONT><P>
+
+END_HTML
 }
 
 #------------------------------------------------------------------------------
 sub Kymographs {
-
+my $Output;
 
 $Output  = "<FORM ACTION='ParticleStats_Web.pl' METHOD='post' ENCTYPE='multipart/form-data'>" .
            "<INPUT TYPE='HIDDEN' NAME='Phase' VALUE='Kymographs'>" .
@@ -566,7 +501,7 @@ $Output .= "<TR BGCOLOR=whitesmoke>" .
            "<TD><FONT FACE='sans,arial' SIZE=2>Noise Estimation Method</FONT></TD>" .
            "<TD><SELECT NAME='OPT_Noise' " .
            "STYLE='font-family:sans;font-size:10pt;background-color:whitesmoke'>".
-	   "<OPTION VALUE='segmented'>segmented\n" .
+           "<OPTION VALUE='segmented'>segmented\n" .
            "<OPTION VALUE='segmented_diag'>segmented_diag\n" .
            "<OPTION VALUE='None'>None\n" .
            "</TD></TR>";
@@ -598,7 +533,7 @@ return $Output;
 #------------------------------------------------------------------------------
 sub Compare {
 
-my ($Output, @chars, $Directory);
+my $Output;
 
 $Output  = "<FORM ACTION='ParticleStats_Web.pl' METHOD='post' ENCTYPE='multipart/form-data'>" .
            "<INPUT TYPE='HIDDEN' NAME='Phase' VALUE='Compare'>" .
@@ -705,8 +640,6 @@ $Output .= "<TR BGCOLOR=whitesmoke><TD COLSPAN=2>" .
 $Output .= "</TD></TR></TABLE>";
 
 $Output .= "</FORM></FONT><P>";
-
-
 
 return $Output;
 }
@@ -838,13 +771,12 @@ END_HTML
 }
 
 
-#------------------------------------------------------------------------------
 sub Print_HTML
 {
   my $Output  = shift;
-  my $DirRand = shift; # only def if $Step eq Run
+  my $DirRand = shift;
 
-  if ($Step eq "Run")
+  if (defined $DirRand)
     {
       my $webpage_run = get_index_html ($Output, 'UA-39620323-3');
       open (WEBPAGE, ">", "$uploaddir/$DirRand/index.html");
@@ -853,3 +785,37 @@ sub Print_HTML
     }
   print get_index_html ($Output, 'UA-39620323-2');
 }
+
+
+sub main
+{
+
+  my $q = new CGI;
+  my $Phase = $q->param('Phase') // 'Start';
+  my $Step = $q->param('Step') // '';
+
+  my %subs = (
+    Directionality => \&Directionality,
+    Compare => \&Compare,
+    Kymographs => \&Kymographs,
+  );
+
+  if (! defined $subs{$Phase})
+    {
+      $Phase = "Start";
+      Print_HTML (Start_Page ());
+    }
+  elsif ($Step eq "Run")
+    {
+      my ($Output, $DirRand) = Process ($Phase, $q, $uploaddir);
+      Print_HTML ($Output, $DirRand);
+    }
+  else # we have a phase but step is invalid or unset, so same as Start
+    {
+      Print_HTML (&{$subs{$Phase}} ());
+    }
+
+  Tracker($Phase, $uploaddir);
+}
+
+main ();
