@@ -43,7 +43,7 @@ use warnings;
 
 use POSIX;
 
-my( $q, $Upload, $Start, $uploaddir, $Process, $ExcelFile1, $ExcelFile2, 
+my( $q, $Upload, $uploaddir, $Process, $ExcelFile1, $ExcelFile2,
     $TiffFile1, $upload_FH3, $TiffFile2, $upload_FH4, 
     $NoFiles, $upload_FH1, $upload_FH2, $Track, $Runner,
     $Remover, $DirRand, $Phaser, $cgidir, $webspace,   );
@@ -90,41 +90,40 @@ my $Output;
 if( $Phase eq "Directionality" and $Step eq "Start")
   {
     $Output = Directionality();
-    Print_HTML($Output,"green");
+    Print_HTML($Output);
   }
 elsif( $Phase eq "Directionality" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH3,
                                  $ExcelFile1,$TiffFile1);
-    Print_HTML("$Output","green",$DirRand)
+    Print_HTML("$Output", $DirRand)
   }
 elsif ($Phase eq "Compare" and $Step eq "Start")
   {
     $Output = Compare();
-    Print_HTML($Output,"green");
+    Print_HTML($Output);
   }
 elsif( $Phase eq "Compare" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH2,
                                  $ExcelFile1,$ExcelFile2);
-    Print_HTML("$Output","green",$DirRand)
+    Print_HTML("$Output", $DirRand)
   }
 elsif( $Phase eq "Kymographs" and $Step eq "Start")
   {
     $Output = Kymographs();
-    Print_HTML("$Output<P>","green");
+    Print_HTML("$Output<P>",);
   }
 elsif( $Phase eq "Kymographs" and $Step eq "Run")
   {
     ($Output,$DirRand) = Process($uploaddir,$upload_FH1,$upload_FH4,
                                  $ExcelFile1,$TiffFile2);
-    Print_HTML("$Output","green",$DirRand)
+    Print_HTML("$Output", $DirRand)
   }
 else
   {
-    $Start = Start_Page($uploaddir);
     $Phase = "Start";
-    Print_HTML($Start,"green");
+    Print_HTML (Start_Page ($cgidir));
   }
 
 Tracker($Phase, $uploaddir);
@@ -717,145 +716,144 @@ return $Output;
 }
 
 
-#------------------------------------------------------------------------------
-sub Start_Page {
+sub Start_Page
+{
+  my $cgi_dir = shift;
 
-my ( $Options, $Degrees, $Output, @Files, $i, $uploaddir, @TIFFs, 
-     $XLSOutput, $TIFFOutput,  );
+  return <<"END_HTML";
+<TABLE BGCOLOR='white' WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
+  <TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2>
+  <B>Welcome to ParticleStats</B><BR>
+  ParticleStats is a suite of programs for the analysis of intracellular particle motility and cytoskeletal polarity. <P>
+  <I>ParticleStats:Compare:</I>
+  The dynamics of particle movement, such as in the case of motor driven transport, can be explored through the calculation of runs and pauses in the movement. Statistical comparisons can be made between different populations of particles such as in the case of a wild type Vs mutant.
+  <P>
+  <I>ParticleStats:Directionality:</I>
+  The directionality of a set of tracked particles is determined using directional statistics. The windmaps are a novel way of visualising bias in the travel direction of particles. Further evidence is provided with rose diagrams and radial histograms.
+  <P>
+  <I>ParticleStats:Kymographs:</I>
+  Analysis of the dynamics of separating kinetochores as displayed in kymographs<P>
 
-$Output = "<TABLE BGCOLOR='white' WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2>" .
-            "<B>Welcome to ParticleStats</B><BR>" .
-"ParticleStats is a suite of programs for the analysis of intracellular particle motility and cytoskeletal polarity. <P>
-<I>ParticleStats:Compare:</I>
-The dynamics of particle movement, such as in the case of motor driven transport, can be explored through the calculation of runs and pauses in the movement. Statistical comparisons can be made between different populations of particles such as in the case of a wild type Vs mutant.
-<P>
-<I>ParticleStats:Directionality:</I>
-The directionality of a set of tracked particles is determined using directional statistics. The windmaps are a novel way of visualising bias in the travel direction of particles. Further evidence is provided with rose diagrams and radial histograms.
-<P>
-<I>ParticleStats:Kymographs:</I>
-Analysis of the dynamics of separating kinetochores as displayed in kymographs<P>" .
+  <B>Please Select ParticleStats Program To Use:</B></TD></TR>
+  <TR><TD VALIGN=top ALIGN=center>
 
-            "<B>Please Select ParticleStats Program To Use:</B></TD></TR>" .
-            "<TR><TD VALIGN=top ALIGN=center>" .
+  <TABLE BGCOLOR=whitesmoke STYLE='border:0px;border-style:solid'>
 
-            "<TABLE BGCOLOR=whitesmoke STYLE='border:0px;border-style:solid'>" .
+    <TR HEIGHT=100 BGCOLOR=white>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. ParticleStats:Compare</TD>
+    <TD VALIGN=MIDDLE><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start'>
+    <IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>
+    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    Compare Runs & Pauses from Tracked data</A></TD>
+    </TR>
 
-            "<TR HEIGHT=100 BGCOLOR=white>" . 
-            "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. ParticleStats:Compare</TD>" .
-            "<TD VALIGN=MIDDLE><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start'>" . 
-            "<IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>" .
-            "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>" .
-            "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>" . 
-            "Compare Runs & Pauses from Tracked data</A></TD>" .
-            "</TR>" .
+    <TR HEIGHT=100 BGCOLOR=white>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. ParticleStats:Directionalityi</TD>
+    <TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start'>
+    <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>
+    <TD><FONT FACE='sans,arial' SIZE=2>
+    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    Analyse Directionality from Tracked data</TD>
+    </TR>
 
-            "<TR HEIGHT=100 BGCOLOR=white>" . 
-            "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. ParticleStats:Directionalityi</TD>" .
-            "<TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start'>" . 
-            "<IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>" .
-            "<TD><FONT FACE='sans,arial' SIZE=2>" .
-            "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>" . 
-            "Analyse Directionality from Tracked data</TD>" .
-            "</TR>" .
+    <TR HEIGHT=100 BGCOLOR=white>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. ParticleStats:Kymographs</TD>
+    <TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start'>
+    <IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>
+    <TD><FONT FACE='sans,arial' SIZE=2>
+    <A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    Analyse Data from Kymographs images</TD>
+    </TR>
 
-            "<TR HEIGHT=100 BGCOLOR=white>" . 
-            "<TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. ParticleStats:Kymographs</TD>" .
-            "<TD><A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start'>" .
-            "<IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>" .
-            "<TD><FONT FACE='sans,arial' SIZE=2>" .
-            "<A HREF='$cgidir/ParticleStats_Web.pl?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>" .
-            "Analyse Data from Kymographs images</TD>" .
-            "</TR>" .
+  </TABLE>
 
-            "</TABLE>" .
-
-            "</TD></TR></TABLE> <P>";
-
-return $Output;
+  </TD></TR>
+</TABLE>
+END_HTML
 }
 
-#------------------------------------------------------------------------------
-sub Print_HTML {
+sub get_index_html
+{
+  my $Output = shift;
+  my $ga_id = shift;
 
-my( $Output, $DirRand, $IP, $Colour, $Webpage,);
+  my $header = CGI::header("text/html");
+  return <<"END_HTML";
+$header
+<HTML>
+<HEAD>
+<TITLE>ParticleStats</TITLE>
 
-$Output  = $_[0];
-$Colour  = $_[1];
-$DirRand = $_[2];
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', '$ga_id', 'ox.ac.uk');
+  ga('send', 'pageview');
+</script>
 
-$IP = $ENV{'REMOTE_ADDR'};
+</HEAD>
 
-$Webpage =  "Content-type: text/html\n\n";
-$Webpage .= "<HTML><HEAD><TITLE>ParticleStats</TITLE>";
+<BODY>
+  <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
+    <TR><TD COLSPAN=1 ALIGN=left VALIGN=top width=250>
+    <A HREF='http://www.ParticleStats.com'>
+    <IMG SRC='Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>
+    <FONT FACE='sans,arial' SIZE=2 COLOR=black>
+    <B>Open source software for the analysis of intracellular
+    particle motility and cytoskeletal polarity</B>
+    </TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>
+    <B>By Russell S. Hamilton & Ilan Davis</B><BR>
+    Department of Biochemistry, University of Oxford<P>
+    Contact:<BR>&nbsp &nbsp Russell.Hamilton -at- bioch.ox.ac.uk<BR>
+    &nbsp &nbsp <A HREF='http://www.ilandavis.com'
+    STYLE='TEXT-DECORATION: NONE'>[www.ilandavis.com]</A>
+    &nbsp &nbsp <A HREF='http://www.particlestats.com'
+    STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>
+    </TD></TR>
+    <TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>
+    <A HREF='ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>
+    <A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>
+    </TD></TR>
+  </TABLE>
 
-$Webpage .= "<script>\n";
-$Webpage .= "  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ \n";
-$Webpage .= "  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), \n";
-$Webpage .= "  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) \n";
-$Webpage .= "  })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); \n\n";
-$Webpage .= "  ga('create', 'UA-39620323-2', 'ox.ac.uk');\n";
-$Webpage .= "  ga('send', 'pageview'); \n\n";
-$Webpage .= "</script>\n";
+  <P>$Output<P>
 
-$Webpage .= "</HEAD>";
+  <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
+    <TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>
+    Please cite: Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., Nasmyth, K. & Davis, I. (2010) ParticleStats: open source software for the analysis of particle motility. <I>Nucl. Acids Res. Web Server Edition</I> <A HREF='http://dx.doi.org/10.1093/nar/GKQ542' STYLE='text-decoration: none;'>[DOI]</A>
+    </TD></TR></TABLE> <P>
 
-$Webpage .= "<BODY>" .
-            "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=1 ALIGN=left VALIGN=top width=250>" . 
-            "<A HREF='http://www.ParticleStats.com'>" . 
-            "<IMG SRC='Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>" .
-            "<FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "<B>Open source software for the analysis of intracellular " . 
-            "particle motility and cytoskeletal polarity</B>" .
-            "</TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "<B>By Russell S. Hamilton & Ilan Davis</B><BR>" .
-            "Department of Biochemistry, University of Oxford<P>" .
-            "Contact:<BR>&nbsp &nbsp Russell.Hamilton -at- bioch.ox.ac.uk<BR>" .
-            "&nbsp &nbsp <A HREF='http://www.ilandavis.com' " . 
-            "STYLE='TEXT-DECORATION: NONE'>[www.ilandavis.com]</A>" .
-            "&nbsp &nbsp <A HREF='http://www.particlestats.com' " . 
-            "STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>" . 
-            "</TD></TR>" . 
-            "<TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>" . 
-            "<A HREF='ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>" .
-            " <A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>" .
-            " <A HREF='ParticleStats_WebStats.pl' STYLE='TEXT-DECORATION: NONE'>[Visitor Stats]</A>" .
-            "</TD></TR>" .
-            "</TABLE>";
-
-$Webpage .= "<P>$Output<P>" .
-
-            "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "Please cite: Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., Nasmyth, K. & Davis, I. (2010) ParticleStats: open source software for the analysis of particle motility. <I>Nucl. Acids Res. Web Server Edition</I> <A HREF='http://dx.doi.org/10.1093/nar/GKQ542' STYLE='text-decoration: none;'>[DOI]</A>" .
-            "</TD></TR></TABLE>" . "<P>" .
-
-            "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>" .
-            "<A HREF='http://www.opensource.org/docs/definition.php'>" .
-            "<IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png' " .
-            "border=0 width=72 height=60></a></TD>" .
-            "<TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>GNU License<BR>" .
-            "<A HREF='http://www.gnu.org'>" . 
-            "<IMG SRC='https://www.gnu.org/graphics/heckert_gnu.png' HEIGHT=60  BORDER=0></A>" .
-            "</TD></TR></TABLE>";
-$Webpage .= "</BODY></HTML>";
-
-
-my $Webpage2 = $Webpage;
-if($Step eq "Run")
-  { 
-    open(WEBPAGE,">$uploaddir/$DirRand/index.html");
-    $Webpage2 =~ s/Content-type: text\/html//;
-    $Webpage2 =~ s/UA-39620323-2/UA-39620323-3/;
-
-    print WEBPAGE $Webpage2;
-    close WEBPAGE;
-  }
-print $Webpage;
+    <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
+    <TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>
+    <A HREF='http://www.opensource.org/docs/definition.php'>
+    <IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png'
+    border=0 width=72 height=60></a></TD>
+    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>GNU License<BR>
+    <A HREF='http://www.gnu.org'>
+    <IMG SRC='https://www.gnu.org/graphics/heckert_gnu.png' HEIGHT=60  BORDER=0></A>
+    </TD></TR>
+  </TABLE>
+</BODY>
+</HTML>
+END_HTML
 }
 
+
 #------------------------------------------------------------------------------
-# FIN
-#------------------------------------------------------------------------------
+sub Print_HTML
+{
+  my $Output  = shift;
+  my $DirRand = shift; # only def if $Step eq Run
+
+  if ($Step eq "Run")
+    {
+      my $webpage_run = get_index_html ($Output, 'UA-39620323-3');
+      open (WEBPAGE, ">", "$uploaddir/$DirRand/index.html");
+      print WEBPAGE $webpage_run;
+      close WEBPAGE;
+    }
+  print get_index_html ($Output, 'UA-39620323-2');
+}
