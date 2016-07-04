@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 ###############################################################################
 #        ____            _   _      _      ____  _        _                   #
 #       |  _ \ __ _ _ __| |_(_) ___| | ___/ ___|| |_ __ _| |_ ___             #
@@ -39,8 +39,9 @@
 use CGI;
 
 use strict;
+use warnings;
 
-my($uploaddir, $webspace, $cgidir, $AgeDirectionality, $date, $q, 
+my($uploaddir, $webspace, $cgidir, $date, $q,
    $url, @CounterData, $i, $Webpage, $Output,@TempCounterData, 
    @IPAddress, %IPHash, $cnt, %Country, $GeoLoc, $element,);
 
@@ -65,15 +66,6 @@ else
     $webspace  = "http://idcn1.bioch.ox.ac.uk/~particlestats/";
     $cgidir    = "http://idcn1.bioch.ox.ac.uk/cgi-particle";
   }
-
-#Find out the release dates of the 3 programs
-
-use File::stat;
-use Time::localtime;
-my $Age_Dir = ctime(stat('ParticleStats_Directionality.py')->mtime);
-my $Age_Com = ctime(stat('ParticleStats_Compare.py')->mtime);
-my $Age_Kym = ctime(stat('ParticleStats_Kymographs.py')->mtime);
-my $Age_Web = ctime(stat('ParticleStats_Web.pl')->mtime);
 
 $q = new CGI;
 
@@ -142,26 +134,6 @@ $Output .= "</TD>";
 
 $Output .= "<TD ALIGN=right VALIGN=top><IMG SRC=http://maps.google.com/maps/api/staticmap?center=London,UK&size=512x350&maptype=roadmap". $GeoLoc . "&sensor=false></TD></TR></TABLE>";
 
-#ParticleStats code base last updates
-$Output .= "<P><TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-           "<TR><TD VALIGN=top COLSPAN=2><FONT FACE=sans,arial SIZE=4>" . 
-           "<B>ParticleStats code base last updates:<P></B></TD></TR>";
-$Output .= "<TR><TD>";
-$Output .= "<TABLE STYLE='border:1px;border-style:solid;border-color:black'>";
-$Output .= "<TR><TD VALIGN=top><FONT FACE=sans,arial SIZE=2><I>Program</I></TD>" .
-           "<TD><FONT FACE=sans,arial SIZE=2><I>Date</I></TD></TR>";
-$Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>ParticleStats:Directionality</TD>" . 
-           "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$Age_Dir</TD></TR>";
-$Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>ParticleStats:Compare</TD>" .      
-           "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$Age_Com</TD></TR>";
-$Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>ParticleStats:Kymographs</TD>" .       
-           "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$Age_Kym</TD></TR>";
-$Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>ParticleStats:Web</TD>" .       
-           "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$Age_Web</TD></TR>";
-$Output .= "</TABLE>";
-$Output .= "</TD></TR></TABLE>";
-
-
 #------------------------------------------------------------------------------
 # Print out the final HTML
 
@@ -203,8 +175,6 @@ $Webpage .= "<P>$Output<P>" .
             "</TD></TR></TABLE>" . "<P>" .
 
             "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "ParticleStats source code last updated on: $Age_Dir</TD></TR>" .
             "<TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>" .
             "<A HREF='http://www.opensource.org/docs/definition.php'>" .
             "<IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png' " .
