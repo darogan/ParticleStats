@@ -3,4 +3,4 @@
 
 
 
-ParticleStats_Kymographs.py -x ../examples/KymographExample.xls
+ParticleStats_Kymographs.py -x ../examples/KymographExample.xls --tiffdir=../examples/KymographExample_dir
