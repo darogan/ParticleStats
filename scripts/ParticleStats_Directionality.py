@@ -103,10 +103,10 @@ parser.add_option("--SquareColours", metavar="COLOUR",
                   dest="SquareColours", default="angle",
                   help="Colour specification for the windmap square colours [angle|speed]: DEFAULT=angle")
 parser.add_option("--SquareColoursSpeedRangeMin", metavar="SPEEDRANGEMIN",
-                  dest="SquareColoursSpeedRangeMin", default="5",
+                  dest="SquareColoursSpeedRangeMin", default=5,
                   help="WindMap: An integer range to define minimum speed to scale: DEFAULT=5")
 parser.add_option("--SquareColoursSpeedRangeMax", metavar="SPEEDRANGEMAX",
-                  dest="SquareColoursSpeedRangeMiax", default="20",
+                  dest="SquareColoursSpeedRangeMiax", default=20,
                   help="WindMap: An integer range to define maximum speed to scale: DEFAULT=20")
 parser.add_option("--ROIColour", metavar="COLOUR",
                   dest="ROIColour", default="white",
@@ -162,7 +162,10 @@ SquareColoursSpeedRangeMin = int(options.SquareColoursSpeedRangeMin)
 if SquareColoursSpeedRangeMin < 0 or SquareColoursSpeedRangeMin > 200:
         print "ERROR: the wind map speed min range is outside of the allowed range 1..200"
         sys.exit(0)
+
+
 SquareColoursSpeedRangeMax = int(options.SquareColoursSpeedRangeMax)
+
 if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
         print "ERROR: the wind map speed max range is outside of the allowed range 1..200"
         sys.exit(0)
