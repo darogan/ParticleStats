@@ -40,14 +40,14 @@ import numpy as na
 import os,sys,math
 from decimal import *
 import random
-import Scientific.Statistics as SciPy
+#import Scientific.Statistics as SciPy
 import scipy
 #from Scientific.Geometry import Vector
-from Scientific.Geometry.VectorModule import Vector 
+#from Scientific.Geometry.VectorModule import Vector 
 import ParticleStats_Outputs as PS_Outputs
 #import rpy
 #from rpy import r
-import Image
+from PIL import Image
 import re
 #r.library("circular")
 #r.library("CircStats")
@@ -2255,7 +2255,8 @@ def CalculateVectorMagnitude( InVector ):
 	if(InVector[0] == 0) and (InVector[1] == 0):
                 magnitude = 0
 	else:
-		magnitude = Vector( InVector ).length()
+		#magnitude = Vector( InVector ).length()
+		magnitude = na.linalg.norm( InVector )
 
 	return magnitude
 
@@ -2265,7 +2266,10 @@ def CalculateVectorAngle ( InVector ):
 	if(InVector[0] == 0.0) and (InVector[1] == 0.0):
 		Angle = 999.0
 	else:
-		Angle = Vector([0,1]).angle(Vector(InVector))*(180.0/math.pi)
+		#Angle = Vector([0,1]).angle(Vector(InVector))*(180.0/math.pi)
+		v1_u =  [0,1]    / na.linalg.norm( [0,1] )
+    		v2_u =  InVector / na.linalg.norm( InVector )
+    		Angle =  na.arccos(na.clip(na.dot(v1_u, v2_u), -1.0, 1.0))
 	
 	# Special angles (90, -90, 180, 0
 	if(InVector[0] == 0.0) and (InVector[1] == 0.0):

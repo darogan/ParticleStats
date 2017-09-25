@@ -175,14 +175,14 @@ if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
 ###############################################################################
 
 import numpy as na
-import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
+from PIL import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
 #import pillow
 import random, glob, re
-import ParticleStats_Maths   as PS_Maths
-import ParticleStats_Inputs  as PS_Inputs
-import ParticleStats_Plots   as PS_Plots
-import ParticleStats_Outputs as PS_Outputs
-import ParticleStats_Plots  as PS_Plots
+import ParticleStats.ParticleStats_Maths   as PS_Maths
+import ParticleStats.ParticleStats_Inputs  as PS_Inputs
+import ParticleStats.ParticleStats_Plots   as PS_Plots
+import ParticleStats.ParticleStats_Outputs as PS_Outputs
+import ParticleStats.ParticleStats_Plots   as PS_Plots
 
 Colours = ["red","blue","green","purple","orange","yellow",\
            "cyan","brown","magenta","silver","gold"]
@@ -605,34 +605,64 @@ convert = "inkscape --export-png="+SVGWindMapKey+\
           ".png --export-dpi="+DPI+" "+SVGWindMapKey+".svg 2>/dev/null"
 print " + SVGWindMapKey    =", os.path.basename(SVGWindMapKey+".png")
 
+#SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
+#                                          SquareCoords,\
+#                                          SquareBigVector,\
+#                                          SquareBigVectorAngle,\
+#                                          SquareBigVectorMagnitudeLongest,\
+#					  min(SquareBigVectorSpeed),max(SquareBigVectorSpeed),\
+#					  "num",SquareNoLines,FinalIMSize,\
+#					  AxisColours,options.SquareColours,\
+#					  [SquareColoursSpeedRangeMin,SquareColoursSpeedRangeMax],options.ShowArrows,\
+#					  options.ArrowColour,options.ShowGrid,\
+#					  options.ShowRectangles,options.ROIColour)
+
+
 SVGWindMap_1  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareCoords,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-					  SquareBigVectorSpeedMin,SquareBigVectorSpeedMax,\
-					  "num",SquareNoLines,FinalIMSize,\
-					  AxisColours,options.SquareColours,\
-					  SquareColoursSpeedRange,options.ShowArrows,\
-					  options.ArrowColour,options.ShowGrid,\
-					  options.ShowRectangles,options.ROIColour)
+                                          SquareBigVectorSpeed,
+                                          "num",SquareNoLines,FinalIMSize,\
+                                          AxisColours,options.SquareColours,\
+                                          SquareColoursSpeedRangeMin,SquareColoursSpeedRangeMax,options.ShowArrows,\
+                                          options.ArrowColour,options.ShowGrid,\
+                                          options.ShowRectangles,options.ROIColour)
+
+
 print " + SVGWindMap num   =", os.path.basename(SVGWindMap_1+".svg")
 convert = "inkscape --export-png="+SVGWindMap_1+\
           ".png --export-dpi="+DPI+" "+SVGWindMap_1+".svg 2>/dev/null"
 os.popen(convert)
 print " + SVGGWindMap num   =", os.path.basename(SVGWindMap_1+".png")
 
+#SVGWindMap_2  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
+#                                          SquareCoords,\
+#                                          SquareBigVector,\
+#                                          SquareBigVectorAngle,\
+#                                          SquareBigVectorMagnitudeLongest,\
+#					  SquareBigVectorSpeedMin,SquareBigVectorSpeedMax,\
+#                                          "mag",SquareNoLines,FinalIMSize,
+#					  AxisColours,options.SquareColours,\
+#					  [SquareColoursSpeedRangeMin,SquareColoursSpeedRangeMax],options.ShowArrows,\
+#                                          options.ArrowColour,options.ShowGrid,\
+#                                          options.ShowRectangles,options.ROIColour)
+
+
 SVGWindMap_2  = PS_Plots.PlotSVGWindMap_1(OutName,O_Name,X,Y,Factor,Polygon,\
                                           SquareCoords,\
                                           SquareBigVector,\
                                           SquareBigVectorAngle,\
                                           SquareBigVectorMagnitudeLongest,\
-					  SquareBigVectorSpeed,SquareBigVectorSpeedMax,\
-                                          "mag",SquareNoLines,FinalIMSize,
-					  AxisColours,options.SquareColours,\
-					  SquareColoursSpeedRange,options.ShowArrows,\
+                                          SquareBigVectorSpeed,
+                                          "mag",SquareNoLines,FinalIMSize,\
+                                          AxisColours,options.SquareColours,\
+                                          SquareColoursSpeedRangeMin,SquareColoursSpeedRangeMax,options.ShowArrows,\
                                           options.ArrowColour,options.ShowGrid,\
                                           options.ShowRectangles,options.ROIColour)
+
+
 print " + SVGWindMap mag   =", os.path.basename(SVGWindMap_2+".svg")
 convert = "inkscape --export-png="+SVGWindMap_2+\
           ".png --export-dpi="+DPI+" "+SVGWindMap_2+".svg 2>/dev/null"

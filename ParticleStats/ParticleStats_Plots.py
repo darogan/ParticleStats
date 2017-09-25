@@ -54,7 +54,7 @@ matplotlib.use('Agg')
 from matplotlib import pylab
 from pylab import *
 
-import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
+from PIL import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
 
 
 #------------------------------------------------------------------------------

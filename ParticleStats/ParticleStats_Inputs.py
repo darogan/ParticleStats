@@ -39,7 +39,7 @@
 #import numarray as na
 import numpy as na
 import os,sys
-import Image, ImageDraw, ImageColor
+from PIL import Image, ImageDraw, ImageColor
 import glob
 import re
 
