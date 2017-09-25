@@ -157,13 +157,13 @@ if options.SquareColours != "angle" and options.SquareColours != "speed":
 	print "ERROR: SquareColours is not set to the allowed options of angle or speed"
 	sys.exit(0)
 
-
+print "SquareColoursSpeedRangeMin=", SquareColoursSpeedRangeMin
 SquareColoursSpeedRangeMin = int(options.SquareColoursSpeedRangeMin)
 if SquareColoursSpeedRangeMin < 0 or SquareColoursSpeedRangeMin > 200:
         print "ERROR: the wind map speed min range is outside of the allowed range 1..200"
         sys.exit(0)
 
-
+print "SquareColoursSpeedRangeMax=", SquareColoursSpeedRangeMax
 SquareColoursSpeedRangeMax = int(options.SquareColoursSpeedRangeMax)
 
 if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
