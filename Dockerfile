@@ -15,8 +15,11 @@ RUN \
   apt-get -y upgrade && \
   apt-get install -y build-essential && \
   apt-get install -y software-properties-common && \
-  apt-get install -y curl python-pip git htop man unzip vim wget && \
+  apt-get install -y curl python-pip git htop tree man unzip vim wget r-base && \
   apt-get install -y python-rpy2 python-xlrd && \
+  add-apt-repository -y ppa:inkscape.dev/stable && \
+  apt-get -y update && \
+  apt-get -y install inkscape && \
   rm -rf /var/lib/apt/lists/*
 
 
@@ -31,21 +34,26 @@ ENV HOME /root
 # Define working directory.
 WORKDIR /root
 
-#RUN \
-#  pip install --upgrade pip && \
-#  pip install mass boot xlwt && \
-
 RUN \
-  git clone https://github.com/circstat/PyCircStat 
-  #&& \
-  #cd PyCircStat && \
-  #python setup.py install 
+  pip install --upgrade pip && \
+  pip install pillow scipy mass boot xlwt matplotlib && \
+
+#RUN \
+#  git clone https://github.com/circstat/PyCircStat 
+#  && \
+#  cd PyCircStat && \
+#  python setup.py install 
 
 RUN \
   cd /root && \
   git clone https://github.com/darogan/ParticleStats #&& \
-  #cd ParticleStats && \
-  #python setup.py install
+  cd ParticleStats && \
+  python setup.py install
+
+RUN \
+  cd /root && \
+  wget https://cran.r-project.org/src/contrib/CircStats_0.2-4.tar.gz && \ 
+  R CMD INSTALL CircStats_0.2-4.tar.gz
 
 # Define default command.
 CMD ["bash"]
