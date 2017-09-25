@@ -175,8 +175,8 @@ if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
 ###############################################################################
 
 import numpy as na
-#import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
-import pillow
+import Image, ImageFont, ImageDraw, ImageColor, ImageEnhance
+#import pillow
 import random, glob, re
 import ParticleStats_Maths   as PS_Maths
 import ParticleStats_Inputs  as PS_Inputs
