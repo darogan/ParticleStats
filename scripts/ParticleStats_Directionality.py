@@ -106,7 +106,7 @@ parser.add_option("--SquareColoursSpeedRangeMin", metavar="SPEEDRANGEMIN",
                   dest="SquareColoursSpeedRangeMin", default=5,
                   help="WindMap: An integer range to define minimum speed to scale: DEFAULT=5")
 parser.add_option("--SquareColoursSpeedRangeMax", metavar="SPEEDRANGEMAX",
-                  dest="SquareColoursSpeedRangeMiax", default=20,
+                  dest="SquareColoursSpeedRangeMax", default=20,
                   help="WindMap: An integer range to define maximum speed to scale: DEFAULT=20")
 parser.add_option("--ROIColour", metavar="COLOUR",
                   dest="ROIColour", default="white",
