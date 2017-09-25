@@ -751,7 +751,8 @@ def CalcRayleighTest (TrailVectors):
 #------------------------------------------------------------------------------
 def Standard_Dev_Error (Data):
 
-        dev = SciPy.standardDeviation(Data)
+        #dev = scipy.standardDeviation(Data)
+	dev = na.std(Data)
 
 	N   = len(Data)
 

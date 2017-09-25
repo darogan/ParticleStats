@@ -168,10 +168,10 @@ else:
 # LOAD IN THE REQUIRED MODULES ONLY AFTER MAIN USER OPTIONS CHECKED
 ###############################################################################
 print "\nLoading External Modules..."
-import ParticleStats_Inputs  as PS_Inputs
-import ParticleStats_Outputs as PS_Outputs
-import ParticleStats_Maths   as PS_Maths
-import ParticleStats_Plots   as PS_Plots
+import ParticleStats.ParticleStats_Inputs  as PS_Inputs
+import ParticleStats.ParticleStats_Outputs as PS_Outputs
+import ParticleStats.ParticleStats_Maths   as PS_Maths
+import ParticleStats.ParticleStats_Plots   as PS_Plots
 import numpy as na
 import re
 print "Loading complete\n\n"
