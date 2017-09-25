@@ -7,7 +7,7 @@
 
 __Open source software for the analysis of particle motility and cytoskelteal polarity__
 
-ParticleStats was created by Russell Hamilton ([Centre for Trophoblast Research, University of Cambridge](http://www.trophoblast.cam.ac.uk)) and Ilan Davis ()[Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) and in collaboration with the [Micron Advanced Imaging Facility](http://www.micron.ox.ac.uk).
+ParticleStats was created by Russell Hamilton ([Centre for Trophoblast Research, University of Cambridge](http://www.trophoblast.cam.ac.uk)) and Ilan Davis ([Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) and in collaboration with the [Micron Advanced Imaging Facility](http://www.micron.ox.ac.uk).
 
 ##### Project Page #####
 
@@ -23,12 +23,42 @@ http://dx.doi.org/10.1093/nar/gkq542
 The study of dynamic cellular processes in living cells is central to biology and is particularly powerful when the motility characteristics of individual objects within cells can be determined and analysed statistically. However, commercial programs only offer a very limited range of inflexible analysis modules and there are currently no open source programs for extensive analysis of particle motility. Here, we describe ParticleStats (www.ParticleStats.com), a web server and open source programs, which input the X,Y co-ordinate positions of objects in time, and outputs novel analyses, graphical plots and statistics for motile objects. ParticleStats comprises three separate analysis programs. Firstly ParticleStats:Directionality, for the global analysis of polarity, for example microtubule plus end growth in Drosophila oocytes. Secondly, ParticleStats:Compare for the analysis of saltatory movement in terms of runs and pauses. This can be applied to chromosome segregation and molecular motor based movements. Thirdly, ParticleStats:Kymographs for the analysis of kymograph images, for example as applied to separation of chromosomes in mitosis. These analyses have provided key insights into molecular mechanisms that are not possible from qualitative analysis alone and are widely applicable to many other cell biology problems.
 
 ##### Command Line Version #####
+ParticleStats depends on several external packages to run, to simpify the installation there is a Docker version requiring only Docker to be pre-installed, and the ParticleStats repository to be cloned. The Docker version compiles all the required packages automatically.
+
+For the command line version, once the dependencies are met, ParticleStats can be installed and run as follows.
 
     git clone https://github.com/darogan/ParticleStats
 
-##### Docker Version #####
-A docker verion to similify installation and usage is underway
+    cd ParticleStats
 
+The three main tools, plus basic usage are:
+
+    ParticleStats_Directionality.py --help
+
+    ParticleStats_Compare.py --help
+
+    ParticleStats_Kymographs.py --help
+
+##### Docker Version #####
+
+Download and install [Docker](https://docs.docker.com/engine/installation/) and then follow the steps below:
+
+1. `git clone https://github.com/darogan/ParticleStats`
+
+2. `cd ParticleStats`
+
+3. `docker build -t particlestats_docker .`
+
+4. `docker run -it particlestats_docker`
+
+A Docker Hub version is planned to further similify the installation and usage of the Docker Version of ParticleStats.
+
+
+##### To Do #####
+1. Shared directories for user data
+2. Markdown version of documentation
+3. Add functionality for zebra fish behavioral studies
+4. Docker Hub Version
 
 ##### GNU License #####
 
