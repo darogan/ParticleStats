@@ -23,7 +23,23 @@ http://dx.doi.org/10.1093/nar/gkq542
 The study of dynamic cellular processes in living cells is central to biology and is particularly powerful when the motility characteristics of individual objects within cells can be determined and analysed statistically. However, commercial programs only offer a very limited range of inflexible analysis modules and there are currently no open source programs for extensive analysis of particle motility. Here, we describe ParticleStats (www.ParticleStats.com), a web server and open source programs, which input the X,Y co-ordinate positions of objects in time, and outputs novel analyses, graphical plots and statistics for motile objects. ParticleStats comprises three separate analysis programs. Firstly ParticleStats:Directionality, for the global analysis of polarity, for example microtubule plus end growth in Drosophila oocytes. Secondly, ParticleStats:Compare for the analysis of saltatory movement in terms of runs and pauses. This can be applied to chromosome segregation and molecular motor based movements. Thirdly, ParticleStats:Kymographs for the analysis of kymograph images, for example as applied to separation of chromosomes in mitosis. These analyses have provided key insights into molecular mechanisms that are not possible from qualitative analysis alone and are widely applicable to many other cell biology problems.
 
 ##### Command Line Version #####
-ParticleStats depends on several external packages to run, to simpify the installation there is a Docker version requiring only Docker to be pre-installed, and the ParticleStats repository to be cloned. The Docker version compiles all the required packages automatically.
+ParticleStats depends on several external packages to run, to simpify the installation there is a Docker version (see below).
+
+The command line version has been tested on Linux and MacOSX
+
+| Dependency | Source |
+| ---------- | ------ |
+| R          | https://cran.r-project.org       |
+| inkscape   | https://inkscape.org |
+
+| Python Modules | Source |
+| -------------- | ------ |
+| pillow, scipy, boot, xlwt, matplotlib, rpy2, xlrd | https://pypi.python.org |
+
+| R libraries | Source |
+| ----------- | ------ |
+| CircStats   |  https://cran.r-project.org/src/contrib/CircStats_0.2-4.tar.gz |
+
 
 For the command line version, once the dependencies are met, ParticleStats can be installed and run as follows.
 
@@ -40,7 +56,7 @@ The three main tools, plus basic usage are:
     ParticleStats_Kymographs.py --help
 
 ##### Docker Version #####
-
+The Docker version of ParticleStats requires only Docker to be pre-installed. And the ParticleStats repository to be cloned - actually the only requirement from the ParticleStats repositoru is the `Dockerfile`. The Docker version compiles all the required packages automatically.
 Download and install [Docker](https://docs.docker.com/engine/installation/) and then follow the steps below:
 
 1. `git clone https://github.com/darogan/ParticleStats`
