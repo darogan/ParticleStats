@@ -101,11 +101,11 @@ if( options.Noise and options.Noise != "edge" and \
 
 import numpy as na
 import glob
-import ParticleStats_Maths          as PS_Maths
-import ParticleStats_Inputs         as PS_Inputs
-import ParticleStats_Plots          as PS_Plots
-import ParticleStats_Outputs        as PS_Outputs
-import Image
+import ParticleStats.ParticleStats_Maths          as PS_Maths
+import ParticleStats.ParticleStats_Inputs         as PS_Inputs
+import ParticleStats.ParticleStats_Plots          as PS_Plots
+import ParticleStats.ParticleStats_Outputs        as PS_Outputs
+from PIL import Image
 
 Colours = ["red","blue","green","cyan","orange","yellow",\
            "silver","purple","brown","magenta","black","gold"]
