@@ -41,7 +41,7 @@ import numpy as na
 from optparse import OptionParser
 
 
-import ParticleStats.ParticleStats_Inputs.py as PS_Inputs
+import ParticleStats.ParticleStats_Inputs as PS_Inputs
 
 
 ###############################################################################
