@@ -16,12 +16,12 @@ http://www.ParticleStats.com
 
 ##### Citation: #####
 
-Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       
-http://dx.doi.org/10.1093/nar/gkq542
+Hamilton, R.S., Parton, R.M., Oliveira, R.A., Ball, G., Vendra, G., Nasmyth, K. & Davis, I. (2010) ParticleStats: Open source software for the analysis of intracellular particle motility and cytoskeletal polarity. Nucleic Acids Research (Web Server Edition) [[DOI](http://dx.doi.org/10.1093/nar/gkq542)]
 
 ##### Abstract #####
 
 The study of dynamic cellular processes in living cells is central to biology and is particularly powerful when the motility characteristics of individual objects within cells can be determined and analysed statistically. However, commercial programs only offer a very limited range of inflexible analysis modules and there are currently no open source programs for extensive analysis of particle motility. Here, we describe ParticleStats (www.ParticleStats.com), a web server and open source programs, which input the X,Y co-ordinate positions of objects in time, and outputs novel analyses, graphical plots and statistics for motile objects. ParticleStats comprises three separate analysis programs. Firstly ParticleStats:Directionality, for the global analysis of polarity, for example microtubule plus end growth in Drosophila oocytes. Secondly, ParticleStats:Compare for the analysis of saltatory movement in terms of runs and pauses. This can be applied to chromosome segregation and molecular motor based movements. Thirdly, ParticleStats:Kymographs for the analysis of kymograph images, for example as applied to separation of chromosomes in mitosis. These analyses have provided key insights into molecular mechanisms that are not possible from qualitative analysis alone and are widely applicable to many other cell biology problems.
+
 
 ##### Command Line Version #####
 ParticleStats depends on several external packages to run, to simpify the installation there is a Docker version (see below).
@@ -76,6 +76,16 @@ A Docker Hub version is planned to further similify the installation and usage o
 2. Markdown version of documentation
 3. Add functionality for zebra fish behavioral studies
 4. Docker Hub Version
+
+##### Publications Citing ParticleStats #####
+
+* Oliveira, R.A., Hamilton, R.S., Pauli, A., Davis, I., Nasmyth, K. (2010) Cohesin cleavage and Cdk inhibition trigger formation of daughter nuclei. Nature Cell Biology, 12, 185-192 [[DOI](http://dx.doi.org/10.1038/ncb2018)]
+
+* Vendra, G., Hamilton, R.S. & Davis, I. (2007) Dynactin suppresses the retrograde movement of apically localized mRNA in Drosophila blastoderm embryos. RNA, 13, 1-8. [[DOI](http://dx.doi.org/10.1261/rna.509007)]
+
+* Parton, R.M., Hamilton, R.S., Ball, G., Yang, L., Cullen, F., Lu, W., Ohkura, H. & Davis, I. (2011) A PAR-1 dependent orientation gradient of dynamic microtubules establishes cell polarity in the Drosophila oocyte. Journal of Cell Biology, 194, 121-135. [[DOI](http://dx.doi.org/10.1083/jcb.201103160)]
+
+* Hartswood. E., Brodie, J., Vendra, G., Davis, I. and Finnegan. D.J. (2012) RNA:RNA interaction can enhance RNA localization in Drosophila oocytes. RNA, 18, 1-9. [[DOI](http://dx.doi.org/10.1261/rna.026674.111)]
 
 ##### GNU License #####
 
