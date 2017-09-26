@@ -39,16 +39,16 @@ module1 = Extension('ParticleStats_linRegressFit',
 
 setup(
 	name = 'ParticleStats',
-	version = '0.3',
+	version = '2.0',
 	author = 'Russell Hamilton',
-	author_email = 'Russell.Hamilton@bioch.ox.ac.uk',
+	author_email = 'darogan@gmail.com',
 	url = 'http://www.ParticleStats.com',
 	description = 'ParticleStats: open source software for the analysis of particle motility',
 	platforms = ["platform independent"],
-	license = 'GPLv2',
+	license = 'GPLv3',
 	packages = ['ParticleStats'],
 	#py_modules=[ "ParticleStats_Inputs.py", "ParticleStats_Maths.py", "ParticleStats_Outputs.py", "ParticleStats_Plots.py", "ParticleStats_RandomTrailGenerator.py", "ParticleStats_Vectors.py", "Test_Interactive_OSX_DivideUpLines.py", "Test_Interactive_OSX.py", "Test_Interactive.py" ],
-	scripts=["scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py" ],
+	scripts=["scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py", "ParticleStats_Trackmate.py", "ParticleStats_Vibtest.py" ],
 	ext_modules = [module1],
 	package_data={
 		'ParticleStats': [
