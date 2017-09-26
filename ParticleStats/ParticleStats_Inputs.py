@@ -938,7 +938,7 @@ def ReadVibtest_SingleFile (CsvFile):
 		for element in VibTestFile:
 			if( element[2] == "Arena"):
 				if( num < 10):
-					print ',' . join([O_Name, str(num), str(ImagePlane),
+					print ',' . join(["O_Name", str(num), str(ImagePlane),
 									element[3], element[5], element[6],
 									element[8], element[10], element[12]])
 
