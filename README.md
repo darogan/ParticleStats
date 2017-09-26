@@ -12,7 +12,9 @@ ParticleStats was created by Russell Hamilton ([Centre for Trophoblast Research,
 
 ##### Project Page #####
 
-http://www.ParticleStats.com                                
+http://www.ParticleStats.com  
+
+If you have ideas or request for new features please submit them as issues.                              
 
 ##### Citation: #####
 
@@ -69,13 +71,6 @@ Download and install [Docker](https://docs.docker.com/engine/installation/) and 
 4. `docker run -it particlestats_docker`
 
 A Docker Hub version is planned to further similify the installation and usage of the Docker Version of ParticleStats.
-
-
-##### To Do #####
-1. Shared directories for user data
-2. Markdown version of documentation
-3. Add functionality for zebra fish behavioral studies
-4. Docker Hub Version
 
 ##### Publications Citing ParticleStats #####
 
