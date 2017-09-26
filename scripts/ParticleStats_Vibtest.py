@@ -40,6 +40,10 @@ import os,sys,math,os.path
 import numpy as na
 from optparse import OptionParser
 
+
+import ParticleStats_Inputs.py as PS_Inputs
+
+
 ###############################################################################
 # PARSE IN THE USER OPTIONS 
 ###############################################################################
@@ -63,6 +67,14 @@ print
 (O_Dir,O_File) = os.path.split(options.CsvFile)
 (O_Name,O_Ext) = os.path.splitext(O_File)
 OutName =  O_Name , ".xls"
+
+
+Coords = PS_Inputs.ReadVibtest_SingleFile(options.CsvFile)
+
+
+
+sys.exit()
+
 
 print "Output Files = ", OutName
 

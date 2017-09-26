@@ -456,39 +456,39 @@ def ReadExcelKymographs2 (FileName):
 #------------------------------------------------------------------------------
 def ReadExcelCoords (FileName,PR,PixelRatioMethod,TimeStart,TimeEnd,FlipY):
 
-        import xlrd
-        import re
+    import xlrd
+    import re
 
-        try:
-                F_Coords = open(FileName,'r')
-        except:
-                print "\nError->\tFile: %s does not exist\n" % FileName
-                sys.exit()
+    try:
+    	F_Coords = open(FileName,'r')
+    except:
+        print "\nError->\tFile: %s does not exist\n" % FileName
+        sys.exit()
 
-        book  = xlrd.open_workbook(FileName)
+    book  = xlrd.open_workbook(FileName)
 	#print "The number of worksheets in,", FileName, "is", book.nsheets
-        #print "Sheets are called:", book.sheet_names()
+    #print "Sheets are called:", book.sheet_names()
 
 	PatternCorrectionSheet = re.compile(r'correction')
 	PatternAxisSheet       = re.compile(r'axis')
 	PatternS               = re.compile(r'\AStack\Z')
 	PatternX               = re.compile(r'\AX\Z')
-        PatternY               = re.compile(r'\AY\Z')
-        PatternZ               = re.compile(r'\AZ\Z')
-        PatternT               = re.compile(r'\ATrack #\Z')
-        PatternO               = re.compile(r'\AObject #\Z')
+    PatternY               = re.compile(r'\AY\Z')
+    PatternZ               = re.compile(r'\AZ\Z')
+    PatternT               = re.compile(r'\ATrack #\Z')
+    PatternO               = re.compile(r'\AObject #\Z')
 	PatternF               = re.compile(r'\AFrame #\Z')
-        PatternIN              = re.compile(r'\AImage Name\Z')
-        PatternIP              = re.compile(r'\AImage Plane\Z')
-        PatternTI              = re.compile(r'\ATime Interval\Z')
+    PatternIN              = re.compile(r'\AImage Name\Z')
+    PatternIP              = re.compile(r'\AImage Plane\Z')
+    PatternTI              = re.compile(r'\ATime Interval\Z')
 	PatternX1              = re.compile(r'\AX1\Z')
 	PatternY1              = re.compile(r'\AY1\Z')
 	PatternX2              = re.compile(r'\AX2\Z')
 	PatternY2              = re.compile(r'\AY2\Z')
 
-        ColumnX  = 99;  ColumnY  = 99;  ColumnZ  = 99;
-        ColumnT  = 99;  ColumnO  = 99;  ColumnIN = 99;
-        ColumnIP = 99;  ColumnTI = 99;  ColumnX1 = 99;  
+    ColumnX  = 99;  ColumnY  = 99;  ColumnZ  = 99;
+    ColumnT  = 99;  ColumnO  = 99;  ColumnIN = 99;
+    ColumnIP = 99;  ColumnTI = 99;  ColumnX1 = 99;  
 	ColumnY1 = 99;  ColumnX2 = 99;  ColumnY2 = 99;
 
 	Coords      = []
@@ -722,7 +722,7 @@ def ReadExcelCoords (FileName,PR,PixelRatioMethod,TimeStart,TimeEnd,FlipY):
 	if len(Corrections) < 1: Corrections = [99,99,99,99]
 	if len(Axes) < 1:	 Axes        = [99,99,99,99] #[100,120,100,100] #[99,99,199,99]
 
-        return Cooords, Corrections, Axes
+	return Cooords, Corrections, Axes
 
 #------------------------------------------------------------------------------
 def ReadExcelCoordsMetamorph (FileName):
@@ -901,6 +901,77 @@ def ReadPolygonFile(FileName):
         F_Polygon.close()
 
 	return polygon
+
+
+#------------------------------------------------------------------------------
+def ReadVibtest_SingleFile (FileName):
+
+	import re
+	import csv
+
+	try:
+		F_Coords = open(FileName,'r')
+	except:
+		print "\nError->\tFile: %s does not exist\n" % FileName
+		sys.exit()
+
+	TimeInterval = 250
+	NumArenas    = 24
+
+	ExptData = []
+
+	count = 0
+	while (count < NumArenas):
+    	ExptData.append([])
+    	count += 1
+
+
+	with open(options.CsvFile, 'rb') as csvfile:
+
+    	VibTestFile = csv.reader(csvfile, delimiter=',', quotechar='"')
+
+    	num = 0
+    	ImagePlane = 1
+
+    	print "ImageName,ImagePlane,Arena,X,Y,Zone,Distance,Segment"
+
+    	for element in VibTestFile:
+        	if( element[2] == "Arena"):
+            	if( num < 10):
+                	print ',' . join([O_Name, str(num), str(ImagePlane),
+                    	              element[3], element[5], element[6],
+                        	          element[8], element[10], element[12]])
+
+ 				timestamp    = element[0].split(':')
+				timestamp[0] = timestamp[0].lstrip("0")
+				timestamp[1] = timestamp[1].lstrip("0")
+				timestamp[2] = timestamp[2].lstrip("0")
+				secs         = timestamp[2].split('.')
+
+				if( len(timestamp[0]) < 1): timestamp[0] = 0
+				if( len(timestamp[1]) < 1): timestamp[1] = 0
+				if( len(timestamp[2]) < 1): timestamp[2] = 0
+				if( len(secs[0]) < 1):      secs[0] = str(0)
+				if( len(secs[1]) < 1):      secs[1] = str(0)
+
+            	#t = datetime.time(int(timestamp[0]), int(timestamp[1]), int(secs[0]), int(secs[1]))
+            	#timeSecs = ".".join(secs) 
+
+				ExptData[ int(element[3])-1 ].append( [int(ImagePlane), float(element[3]),
+													   float(element[5]), float(element[6]),
+													   float(element[8]), float(element[10]),
+													   float(element[12]) ] )
+
+				if(int(element[3]) == 24):  ImagePlane += 1
+				num += 1
+
+	for i in range(len(ExptData)):
+
+    	for j in range(len(ExptData[i])):
+
+        	print(i,",",j,",",ExptData[i][j])
+
+	return ExptData
 
 #------------------------------------------------------------------------------
 # FIN
