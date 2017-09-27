@@ -42,7 +42,7 @@ FILES=( TrackAlign_man.xls TrackAlign_auto.xls )
 IMAGES=( TrackAlign_image.tif )
 ROI=( TrackAlign_roiall.txt)
 MULTIPLES=(4)
-DIR1="examples"
+DIR1="../examples"
 
 for j in "${MULTIPLES[@]}"
 do
@@ -50,7 +50,7 @@ do
 
 	#--generatestats --typerandomtracks=Random --ntracks=15 \
 
-	time python TrackAlign.py \
+	TrackAlign.py \
         --xls1 $DIR1/${FILES[0]} --tif $DIR1/${IMAGES[0]} \
         --xls2 $DIR1/${FILES[1]} \
         --boundaryfilter -s $j -g -r -a -o text \
