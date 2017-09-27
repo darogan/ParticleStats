@@ -48,11 +48,12 @@ setup(
 	license = 'GPLv3',
 	packages = ['ParticleStats'],
 	#py_modules=[ "ParticleStats_Inputs.py", "ParticleStats_Maths.py", "ParticleStats_Outputs.py", "ParticleStats_Plots.py", "ParticleStats_RandomTrailGenerator.py", "ParticleStats_Vectors.py", "Test_Interactive_OSX_DivideUpLines.py", "Test_Interactive_OSX.py", "Test_Interactive.py" ],
-	scripts=["scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py", "scripts/ParticleStats_Trackmate.py", "scripts/ParticleStats_Vibtest.py" ],
+	scripts=["scripts/ParticleStats_Compare.py", "scripts/ParticleStats_Directionality.py", "scripts/ParticleStats_Kymographs.py", "scripts/ParticleStats_ROI.py", "scripts/ParticleStats_Trackmate.py", "scripts/ParticleStats_Vibtest.py", "scripts/TrackAlign.py"],
 	ext_modules = [module1],
 	package_data={
 		'ParticleStats': [
-			 "data/*.xls",
-			 "data/*.txt", ],
-                     }
+			 "examples/*.xls",
+			 "examples/*.txt",
+			 "examples/*.tif",  ],
+                 }
 )
