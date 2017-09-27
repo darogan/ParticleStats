@@ -68,8 +68,10 @@ print
 (O_Name,O_Ext) = os.path.splitext(O_File)
 OutName =  O_Name , ".xls"
 
+TimeInterval = 250
+NumArenas    = 24
 
-Coords = PS_Inputs.ReadVibtest_SingleFile(options.CsvFile)
+Coords = PS_Inputs.ReadVibtest_SingleFile(options.CsvFile, TimeInterval, NumArenas)
 
 
 

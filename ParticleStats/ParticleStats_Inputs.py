@@ -12,9 +12,9 @@
 #                                                                             #
 #       Contact: Russell.Hamilton@bioch.ox.ac.uk                              #
 #                http://www.ParticleStats.com                                 #
-#                Department of Biochemistry, South Parks Road,                #
-#                University of Oxford OX1 3QU                                 #
-#       Copyright (C) 2010 Russell S. Hamilton                                #
+#                Centre For Trophoblast Research                              #
+#                University of Cambridge                                      #
+#       Copyright (C) 2017 Russell S. Hamilton                                #
 #                                                                             #
 #       Please cite:                                                          #
 #       Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       #
@@ -904,7 +904,16 @@ def ReadPolygonFile(FileName):
 
 
 #------------------------------------------------------------------------------
-def ReadVibtest_SingleFile (CsvFile):
+def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
+# vibtest file format
+# "000:00:02.476","Info","Arena",1,"Target_location",-1,-1,"Zone",0,"Distance",101,"Segments",1
+# Key Columns: 0 TimeStamp
+#              3 Arena 
+#              5 X
+#              6 Y
+#              8 Zone
+#             10 Distance
+#             12 Segments
 
 	import re
 	import csv
@@ -915,17 +924,19 @@ def ReadVibtest_SingleFile (CsvFile):
 		print "\nError->\tFile: %s does not exist\n" % CsvFile
 		sys.exit()
 
-	TimeInterval = 250
-	NumArenas    = 24
+	(O_Dir,O_File) = os.path.split(CsvFile)
+	(O_Name,O_Ext) = os.path.splitext(O_File)
+	OutName =  '.' . join([O_Name , "xls"])
+
+	print OutName
 
 	ExptData = []
-
 	count = 0
 	while (count < NumArenas):
 		ExptData.append([])
 		count += 1
 
-
+	LineNumber = 1
 	with open(CsvFile, 'rb') as csvfile:
 
 		VibTestFile = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -938,38 +949,29 @@ def ReadVibtest_SingleFile (CsvFile):
 		for element in VibTestFile:
 			if( element[2] == "Arena"):
 				if( num < 10):
-					print ',' . join(["O_Name", str(num), str(ImagePlane),
+					print ',' . join([O_Name, str(num), str(ImagePlane),
 									element[3], element[5], element[6],
 									element[8], element[10], element[12]])
 
- 				timestamp    = element[0].split(':')
-				timestamp[0] = timestamp[0].lstrip("0")
-				timestamp[1] = timestamp[1].lstrip("0")
-				timestamp[2] = timestamp[2].lstrip("0")
-				secs         = timestamp[2].split('.')
+				ExptData[ int(element[3])-1 ].append( [str(O_Name), int(ImagePlane), int(TimeInterval),
+													   float(element[3]),
+													   float(element[5]), float(element[6]), 
+													   int(LineNumber), int(num) ] )
+				#									   float(element[8]), float(element[10]),
+				#									   float(element[12]) ] )
 
-				if( len(timestamp[0]) < 1): timestamp[0] = 0
-				if( len(timestamp[1]) < 1): timestamp[1] = 0
-				if( len(timestamp[2]) < 1): timestamp[2] = 0
-				if( len(secs[0]) < 1):      secs[0] = str(0)
-				if( len(secs[1]) < 1):      secs[1] = str(0)
-
-            	#t = datetime.time(int(timestamp[0]), int(timestamp[1]), int(secs[0]), int(secs[1]))
-            	#timeSecs = ".".join(secs) 
-
-				ExptData[ int(element[3])-1 ].append( [int(ImagePlane), float(element[3]),
-													   float(element[5]), float(element[6]),
-													   float(element[8]), float(element[10]),
-													   float(element[12]) ] )
-
-				if(int(element[3]) == 24):  ImagePlane += 1
+				if(int(element[3]) == 24):
+					ImagePlane += 1
 				num += 1
+
+		LineNumber += 1
 
 	for i in range(len(ExptData)):
 
 		for j in range(len(ExptData[i])):
-
-			print(i,",",j,",",ExptData[i][j])
+			if(ExptData[i][j][1] == 1):
+			#if( j == 1):
+				print(i,j, ExptData[i][j])
 
 	return ExptData
 
