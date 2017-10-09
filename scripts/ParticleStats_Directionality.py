@@ -58,6 +58,9 @@ parser.add_option("--outhtml", metavar="OUTPUTHTML",
 parser.add_option("-x", "--xls", metavar="EXCELFILE",
                   dest="ExcelFile",
                   help="Name of Excel File")
+parser.add_option("--vibtest", metavar="VIBTESTFILE",
+                  dest="VibtestFile",
+                  help="Name of Vibtest CSV File")
 parser.add_option("-i", "--image", metavar="IMAGEFILE",
                   dest="ImageFile",
                   help="Name of image file: Tif(8bit)/PNG/GIF/JPG")
@@ -125,12 +128,12 @@ parser.add_option("--TimeInterval", metavar="TIMEINTERVAL",
 
 
 #ERROR CHECK
-if( os.path.exists(str(options.ExcelFile)) != 1):
+if( (os.path.exists(str(options.ExcelFile)) != 1) and (os.path.exists(str(options.VibtestFile)) != 1)):
         print "ERROR: Excel file does not exists - check correct path and name"
         sys.exit(0)
-#if( os.path.exists(str(options.ImageFile)) != 1):
-#        print "ERROR: Image file does not exists - check correct path and name", options.ImageFile
-#        sys.exit(0)
+if( os.path.exists(str(options.ImageFile)) != 1):
+        print "ERROR: Image file does not exists - check correct path and name", options.ImageFile
+        sys.exit(0)
 
 (FileName,FileExt) = os.path.splitext(options.ImageFile)
 if FileExt != ".tif" and FileExt != ".jpg"  and FileExt != ".gif" and \
@@ -210,11 +213,16 @@ else:
 if(options.OutputType == "html" ):
         URL = str(options.OutputHTML)
 
-im  = Image.open(options.ImageFile).convert("RGBA")
+#im = Image.open(options.ImageFile).convert("RGBA")
+
+im = Image.open(open(options.ImageFile, 'rb') )
 
 print "Running", sys.argv[0]
 print
-print " + Excel File       =", os.path.basename(options.ExcelFile)
+if(options.ExcelFile):
+	print " + Excel File       =", os.path.basename(options.ExcelFile)
+if(options.VibtestFile):
+	print " + Vibtest File     =", os.path.basename(options.VibtestFile)
 print " + ImageFile        =", os.path.basename(options.ImageFile)
 print " + Squares          =", options.Squares
 print " + Image Size       =", im.size
@@ -234,9 +242,17 @@ if options.FlipY:
 
 
 FlipYImgSize = 0
-Coords,Corrections,Axes = PS_Inputs.ReadExcelCoords(options.ExcelFile,\
+
+if(options.ExcelFile):
+	Coords,Corrections,Axes = PS_Inputs.ReadExcelCoords(options.ExcelFile,\
 			  float(options.PixelRatio),\
 			  options.PixelRatioMethod,0,0,FlipYImgSize)
+elif(options.VibtestFile):
+	Coords,Corrections,Axes = PS_Inputs.ReadVibtest_SingleFile(options.VibtestFile, 250, 24)  
+             
+else:
+	print "ERROR: No suitable coordinate input file found"
+
 FlipYImgSize = 1
 
 Polygon = [0.0,0.0]
@@ -274,22 +290,21 @@ while i < len(Coords):
 
 	if(options.Axis):
 		Axis = [Coords[i][0][0][4],Coords[i][0][0][5],\
-               	        Coords[i][0][1][4],Coords[i][0][1][5]]
-                del Coords[i][0]
+       	        Coords[i][0][1][4],Coords[i][0][1][5]]
+		del Coords[i][0]
 
 		if options.FlipY:
 			Axis[1] = (im.size[1] - Axis[1])
 			Axis[3] = (im.size[1] - Axis[3])
 
-                print "\t+ Axis definition  = [%.1f,%.1f] to [%.1f,%.1f]"%\
-                      (Axis[0],Axis[1],Axis[2],Axis[3])
+		print "\t+ Axis definition  = [%.1f,%.1f] to [%.1f,%.1f]"%\
+        		(Axis[0],Axis[1],Axis[2],Axis[3])
 
-                AxisAngle = PS_Maths.CalculateVectorAngle([Axis[2]-Axis[0],\
-                                                           Axis[3]-Axis[1]])
-                if AxisAngle != 90:
+		AxisAngle = PS_Maths.CalculateVectorAngle([Axis[2]-Axis[0],Axis[3]-Axis[1]])
+		if AxisAngle != 90:
 			Rotate    = (360 - AxisAngle) + int(options.Orient)
-                else:
-                        Rotate = 0
+		else:                
+			Rotate = 0
 
 		if Rotate > 359:
 			Rotate = Rotate % 360
@@ -299,73 +314,77 @@ while i < len(Coords):
 
 #                RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate%90)))+\
 #                            (im.size[1]*math.cos(math.radians(Rotate%90)))
-                RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate)))+\
-                            (im.size[1]*math.cos(math.radians(Rotate)))
-                Shifty    = ((FinalIMSize-RotImgSz)/2) + \
-                            ((RotImgSz/2)-(im.size[0]/2))
-                Shift     = [Shifty,Shifty]
-                Origin    = [ im.size[0]/2,im.size[1]/2 ]
+			RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate)))+\
+        	                    (im.size[1]*math.cos(math.radians(Rotate)))
+			Shifty    = ((FinalIMSize-RotImgSz)/2) + \
+    	                        ((RotImgSz/2)-(im.size[0]/2))
+			Shift     = [Shifty,Shifty]
+			Origin    = [ im.size[0]/2,im.size[1]/2 ]
 
-                Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
+			Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
 
-                (Axis[0],Axis[1]) = PS_Maths.rotateXYbyAngAndOrigin(\
+			(Axis[0],Axis[1]) = PS_Maths.rotateXYbyAngAndOrigin(\
                                              Axis[0],Axis[1],Rotate,\
                                              Origin[0],Origin[1],0,Shift)
-                (Axis[2],Axis[3]) = PS_Maths.rotateXYbyAngAndOrigin(\
+			(Axis[2],Axis[3]) = PS_Maths.rotateXYbyAngAndOrigin(\
                                              Axis[2],Axis[3],Rotate,\
                                              Origin[0],Origin[1],0,Shift)
 	else:
 		print "\t+ Axis definition  = NONE"
 		Axis 	  = [0]
-                AxisAngle = 0
-                Rotate    = 0
-                Origin    = [0,0]
-                Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
+		AxisAngle = 0
+		Rotate    = 0
+		Origin    = [0,0]
+		Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
 
 	print "\t+ Axis VAngle      =", AxisAngle
-        print "\t+ Rotate           =", Rotate
-        print "\t+ Origin Rotate    =", Origin
-        print "\t+ Shift            =", Shift
-        print "\t+ No. Tracks       =", len(Coords[i])
+	print "\t+ Rotate           =", Rotate
+	print "\t+ Origin Rotate    =", Origin
+	print "\t+ Shift            =", Shift
+	print "\t+ No. Tracks       =", len(Coords[i])
 
 	#Applies the rotation the coords
-	j = 0
-	while j < len(Coords[i]):
-        	(Coords[i][j][0][4],Coords[i][j][0][5]) = \
-					PS_Maths.rotateXYbyAngAndOrigin(\
-                                        Coords[i][j][0][4],Coords[i][j][0][5],\
-                                        Rotate,Origin[0],Origin[1],0,Shift)
-                (Coords[i][j][-1][4],Coords[i][j][-1][5]) = \
-                                	PS_Maths.rotateXYbyAngAndOrigin(\
+	if(Rotate > 0):
+		j = 0
+		while j < len(Coords[i]):
+			(Coords[i][j][0][4],Coords[i][j][0][5]) = \
+						PS_Maths.rotateXYbyAngAndOrigin(\
+                	                    Coords[i][j][0][4],Coords[i][j][0][5],\
+                    	                Rotate,Origin[0],Origin[1],0,Shift)
+			(Coords[i][j][-1][4],Coords[i][j][-1][5]) = \
+                       	PS_Maths.rotateXYbyAngAndOrigin(\
                                         Coords[i][j][-1][4],Coords[i][j][-1][5],\
                                         Rotate,Origin[0],Origin[1],0,Shift)
-		j += 1
+			j += 1
+
 	#Applies the rotation the polygon
-	if(options.Polygon):
-	        j = 0
+		if(options.Polygon):
+			j = 0
 	        while j < len(Polygon):
-	                (Polygon[j][0],Polygon[j][1]) = \
-	                                        PS_Maths.rotateXYbyAngAndOrigin(\
-	                                        Polygon[j][0],Polygon[j][1],\
-	                                        Rotate,Origin[0],Origin[1],0,Shift)
-	                j += 1
+				(Polygon[j][0],Polygon[j][1]) = \
+	                     PS_Maths.rotateXYbyAngAndOrigin(\
+	                              Polygon[j][0],Polygon[j][1],\
+	                              Rotate,Origin[0],Origin[1],0,Shift)
+				j += 1
 
 	Trails            = []
-        TrailVectors      = []
+	TrailVectors      = []
 	TrailVectorAngles = []
 	TrailVectors_ROI  = []
 	TrailNoPoints     = []
 
-        j = 0
-        while j < len(Coords[i]):
-        	Trails.append( [Coords[i][j][0][4],Coords[i][j][0][5], \
-                                Coords[i][j][-1][4],Coords[i][j][-1][5] ] )
+	j = 0
+	while j < len(Coords[i]):
+
+		print Coords[i][j][0][4], ",", Coords[i][j][0][5], ",", Coords[i][j][-1][4], ",", Coords[i][j][-1][5] 
+
+		Trails.append( [Coords[i][j][0][4],Coords[i][j][0][5], Coords[i][j][-1][4],Coords[i][j][-1][5] ] )
 		TrailVectors.append ( [Coords[i][j][-1][4]-Coords[i][j][0][4],\
                                        Coords[i][j][-1][5]-Coords[i][j][0][5] ] )
-                TrailsAll.append( Trails[j] )
- 		TrailNoPoints.append( len(Coords[i][j]) )
+		TrailsAll.append( Trails[j] )
+		TrailNoPoints.append( len(Coords[i][j]) )
 		TrailVectorAngles.append( PS_Maths.CalculateVectorAngle(TrailVectors[j]) )
-                TrailVectorsAll.append( TrailVectors[j] )
+		TrailVectorsAll.append( TrailVectors[j] )
 		TrailVectors_ROI.append( [0.0,0.0] )
 #                Outty = "%.4f\n"%float((math.pi/180)*\
 #			PS_Maths.CalculateVectorAngle(TrailVectors[j]))
@@ -373,10 +392,10 @@ while i < len(Coords):
 		j += 1
 
 	(X,Y) = im.size
-        print " + Orig Image Size  = X:", X, " Y:", Y
-        (X,Y) = FinalIMSize,FinalIMSize
-        print " + New Image Size   = X:", X, " Y:", Y
-        print " + Square Size      =", X/Factor, "x", X/Factor
+	print " + Orig Image Size  = X:", X, " Y:", Y
+	(X,Y) = FinalIMSize,FinalIMSize
+	print " + New Image Size   = X:", X, " Y:", Y
+	print " + Square Size      =", X/Factor, "x", X/Factor
 
 	i += 1
 

@@ -928,9 +928,10 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 	(O_Name,O_Ext) = os.path.splitext(O_File)
 	OutName =  '.' . join([O_Name , "xls"])
 
-	print OutName
+	ExptData    = []
+	Corrections = []
+	Axes        = []
 
-	ExptData = []
 	count = 0
 	while (count < NumArenas):
 		ExptData.append([])
@@ -944,21 +945,23 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 		num = 0
 		ImagePlane = 1
 
-		print "ImageName,ImagePlane,Arena,X,Y,Zone,Distance,Segment"
+		print "PS.Inputs: ImageName,ImagePlane,Arena,X,Y,Zone,Distance,Segment"
 
 		for element in VibTestFile:
 			if( element[2] == "Arena"):
 				if( num < 10):
+					print "PS.Inputs: ",
 					print ',' . join([O_Name, str(num), str(ImagePlane),
 									element[3], element[5], element[6],
 									element[8], element[10], element[12]])
 
-				ExptData[ int(element[3])-1 ].append( [str(O_Name), int(ImagePlane), int(TimeInterval),
-													   float(element[3]),
-													   float(element[5]), float(element[6]), 
-													   int(LineNumber), int(num) ] )
-				#									   float(element[8]), float(element[10]),
-				#									   float(element[12]) ] )
+				if( (float(element[5]) >= 0) and (float(element[6]) >= 0)):
+					ExptData[ int(element[3])-1 ].append( [str(O_Name), int(ImagePlane), int(TimeInterval),
+														   float(element[3]),
+														   float(element[5]), float(element[6]), 
+														   int(LineNumber), int(num) ] )
+					#									   float(element[8]), float(element[10]),
+					#									   float(element[12]) ] )
 
 				if(int(element[3]) == 24):
 					ImagePlane += 1
@@ -966,14 +969,17 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 
 		LineNumber += 1
 
-	for i in range(len(ExptData)):
+#	for i in range(len(ExptData)):
+#
+#		for j in range(len(ExptData[i])):
+#			if(ExptData[i][j][1] == 1):
+#			#if( j == 1):
+#				print("PS.Inputs: ", i,j, ExptData[i][j])
 
-		for j in range(len(ExptData[i])):
-			if(ExptData[i][j][1] == 1):
-			#if( j == 1):
-				print(i,j, ExptData[i][j])
+	if len(Corrections) < 1: Corrections = [99,99,99,99]
+	if len(Axes) < 1:    Axes        = [99,99,99,99] #[100,120,100,100] #[99,99,199,99]
 
-	return ExptData
+	return ExptData, Corrections, Axes
 
 #------------------------------------------------------------------------------
 # FIN
