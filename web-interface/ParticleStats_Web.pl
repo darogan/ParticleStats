@@ -47,20 +47,14 @@ use File::Spec;
 my $uploaddir;
 my $webspace;
 
-if($ENV{'HTTP_HOST'} =~ /idcws.bioch.ox.ac.uk/)
+if($ENV{'HTTP_HOST'} =~ /particlestats.trophoblast.cam.ac.uk/)
   {
-    $uploaddir = "/home/rhamilto/public_html/ParticleStats2/PS_Out/";
-    $webspace  = "http://idcws.bioch.ox.ac.uk/~rhamilto/ParticleStats2";
-  }
-elsif($ENV{'HTTP_HOST'} =~ /simulans.bioch.ox.ac.uk/)
-  {
-    $uploaddir = "/home/particlestats/public_html/PS_Out/";
-    $webspace  = "http://simulans.bioch.ox.ac.uk/~particlestats/";
+    $uploaddir = "/var/www/particlestats/docroot/ParticleStats2.0/PS_Out/";
+    $webspace  = "http://particlestats.trophoblast.cam.ac.uk";
   }
 else
   {
-    $uploaddir = "/home/particlestats/public_html/PS_Out/";
-    $webspace  = "http://idcn1.bioch.ox.ac.uk/~particlestats/";
+     exit;
   }
 
 
@@ -109,7 +103,7 @@ sub Process
   my $uploaddir = shift;
 
   my @chars     = ( "A" .. "Z", "a" .. "z", 0 .. 9);
-  my $Directory = join("", @chars[ map { rand @chars } ( 1 .. 20 ) ]);
+  my $Directory = "PSResults." . join("", @chars[ map { rand @chars } ( 1 .. 20 ) ]);
   my $upload_path = File::Spec->catfile ($uploaddir, $Directory);
 
   `mkdir $upload_path`;
@@ -185,14 +179,14 @@ sub Process
 
       if($q->param('OPT_Example') =~ m/on/)
         {
-          $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " .
+          $Command = "./ParticleStats_Compare/ParticleStats_Compare -o html $ExtraOptions " .
                      "-a $uploaddir/CompareExample_control.xls " .
                      "-b $uploaddir/CompareExample_variant.xls " .
                      "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
         }
       else
         {
-          $Command = "python ParticleStats_Compare.py -o html $ExtraOptions " . 
+          $Command = "./ParticleStats_Compare.py -o html $ExtraOptions " . 
                      "-a $upload_path/$ExcelFile1 -b $upload_path/$ExcelFile2 " . 
                      "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
         }
@@ -325,8 +319,8 @@ sub Process
             "<B>ParticleStats results link and command</B></TD></TR>" .
             "<TR><TD><FONT FACE='sans,arial' SIZE=2>" .
             "<B>Static link available for 1 week</B>:<BR>" .
-            "<A HREF='$webspace/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
-            "$webspace/PS_Out/$Directory</A>" .
+            "<A HREF='$webspace/ParticleStats2.0/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
+            "$webspace/ParticleStats2.0/PS_Out/$Directory</A>" .
             "<P><B>Command Line Given</B>:<BR>" .
             "<FONT FACE=courier SIZE=1>$Command</TD></TR>" .
             "<TR><TD VALIGN=top COLSPAN=1>" . $Runner . "</TD></TR></TABLE>";
@@ -554,8 +548,8 @@ $Output .= "<TR BGCOLOR=white>" .
            "<TD><FONT FACE='sans,arial' SIZE=2><INPUT TYPE=CHECKBOX NAME='OPT_Example'> " . 
            "Leave Excel File Input fields blank<BR>" .
            "&nbsp&nbsp&nbsp&nbsp&nbsp The Example are a wt experiment and variant from Oliviera <I>et al</I>, Nature Cell Biology, 2010, <A HREF='http://dx.doi.org/10.1038/ncb2018' STYLE='text-decoration: none;'>[DOI]</A><BR>" .
-           "&nbsp&nbsp&nbsp&nbsp&nbsp The two excel files can be downloaded <A HREF='$webspace/PS_Out/CompareExample_control.xls' STYLE='TEXT-DECORATION: NONE'>[File 1]</A> " .
-           "<A HREF='$webspace/PS_Out/CompareExample_variant.xls' STYLE='TEXT-DECORATION: NONE'>[File 2]</A>" .
+           "&nbsp&nbsp&nbsp&nbsp&nbsp The two excel files can be downloaded <A HREF='$uploaddir/CompareExample_control.xls' STYLE='TEXT-DECORATION: NONE'>[File 1]</A> " .
+           "<A HREF='$uploaddir/CompareExample_variant.xls' STYLE='TEXT-DECORATION: NONE'>[File 2]</A>" .
            "</TD></TR>".
            "<TR BGCOLOR=whitesmoke>" . 
            "<TD><FONT FACE='sans,arial' SIZE=2>Excel File 1 to Upload</TD>" . 
@@ -652,8 +646,8 @@ sub Start_Page
   return <<"END_HTML";
 <TABLE BGCOLOR='white' WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
   <TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2>
-  <B>Welcome to ParticleStats</B><BR>
-  ParticleStats is a suite of programs for the analysis of intracellular particle motility and cytoskeletal polarity. <P>
+  <B>Welcome to ParticleStats 2.0: </B><BR>A suite of tools for the analysis, comparison, and optimization of tracking data 
+  <P>
   <I>ParticleStats:Compare:</I>
   The dynamics of particle movement, such as in the case of motor driven transport, can be explored through the calculation of runs and pauses in the movement. Statistical comparisons can be made between different populations of particles such as in the case of a wild type Vs mutant.
   <P>
@@ -669,31 +663,55 @@ sub Start_Page
   <TABLE BGCOLOR=whitesmoke STYLE='border:0px;border-style:solid'>
 
     <TR HEIGHT=100 BGCOLOR=white>
-    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. ParticleStats:Compare</TD>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. <FONT COLOR='grey'>ParticleStats::</FONT>Compare</TD>
+    <TD width=35 ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD VALIGN=MIDDLE><A HREF='$cgi_url?Phase=Compare&Step=Start'>
-    <IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>
+    <IMG SRC='$webspace/Images/compare_logo_100px.png' BORDER=0></A></TD>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Compare Runs & Pauses from Tracked data</A></TD>
     </TR>
 
     <TR HEIGHT=100 BGCOLOR=white>
-    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. ParticleStats:Directionalityi</TD>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. <FONT COLOR='grey'>ParticleStats::</FONT>Directionality</TD>
+    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD><A HREF='$cgi_url?Phase=Directionality&Step=Start'>
-    <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>
+    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></A></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Directionality from Tracked data</TD>
     </TR>
 
     <TR HEIGHT=100 BGCOLOR=white>
-    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. ParticleStats:Kymographs</TD>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. <FONT COLOR='grey'>ParticleStats::</FONT>Kymographs</TD>
+    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD><A HREF='$cgi_url?Phase=Kymographs&Step=Start'>
-    <IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>
+    <IMG SRC='$webspace/Images/kymograph_logo_100px.png' BORDER=0></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Data from Kymographs images</TD>
     </TR>
+
+    <TR HEIGHT=100 BGCOLOR=white>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>4. <FONT COLOR='grey'>ParticleStats::</FONT>Behavioural</TD>
+    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR='red'>v2.0</TD>
+    <TD><A HREF='$cgi_url?Phase=Behavioural&Step=Start'>
+    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></TD>
+    <TD><FONT FACE='sans,arial' SIZE=2>
+    <A HREF='$cgi_url?Phase=Behavioural&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    Analyse Data from Behavioural assays</TD>
+    </TR>
+
+    <TR HEIGHT=100 BGCOLOR=white>
+    <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>5. <FONT COLOR='grey'>ParticleStats::</FONT>TrackAlign</TD>
+    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR='red'>v2.0</TD>
+    <TD><A HREF='$cgi_url?Phase=TrackAlign&Step=Start'>
+    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></TD>
+    <TD><FONT FACE='sans,arial' SIZE=2>
+    <A HREF='$cgi_url?Phase=TrackAlign&Step=Start' STYLE='TEXT-DECORATION: NONE'>
+    Compare tracking data</TD>
+    </TR>
+
 
   </TABLE>
 
@@ -712,7 +730,7 @@ sub get_index_html
 $header
 <HTML>
 <HEAD>
-<TITLE>ParticleStats</TITLE>
+<TITLE>ParticleStats2.0</TITLE>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -729,42 +747,39 @@ $header
   <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
     <TR><TD COLSPAN=1 ALIGN=left VALIGN=top width=250>
     <A HREF='http://www.ParticleStats.com'>
-    <IMG SRC='Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>
+    <IMG SRC='$webspace/Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>
     <FONT FACE='sans,arial' SIZE=2 COLOR=black>
-    <B>Open source software for the analysis of intracellular
-    particle motility and cytoskeletal polarity</B>
+    <B>A suite of tools for the analysis, comparison, and optimization of tracking data</B>
     </TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>
-    <B>By Russell S. Hamilton & Ilan Davis</B><BR>
-    Department of Biochemistry, University of Oxford<P>
-    Contact:<BR>&nbsp &nbsp Russell.Hamilton -at- bioch.ox.ac.uk<BR>
-    &nbsp &nbsp <A HREF='http://www.ilandavis.com'
-    STYLE='TEXT-DECORATION: NONE'>[www.ilandavis.com]</A>
+    <B>By Russell S. Hamilton </B><BR>
+    <A HREF='http://www.trophoblast.cam.ac.uk' STYLE='TEXT-DECORATION: NONE'>Centre for Trophoblast Research, University of Cambridge</A><P>
+    Contact:<BR>&nbsp &nbsp rsh46 -at- cam.ac.uk<BR>
     &nbsp &nbsp <A HREF='http://www.particlestats.com'
     STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>
     </TD></TR>
     <TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>
-    <A HREF='ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>
-    <A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>
+    <A HREF='$webspace/cgi-bin/ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>&nbsp<A HREF='https://github.com/darogan/ParticleStats' STYLE='TEXT-DECORATION: NONE'>[GitHub]</A>&nbsp<A HREF='http://www.particlestats.com' STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>&nbsp<A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>
     </TD></TR>
   </TABLE>
 
   <P>$Output<P>
 
   <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
-    <TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>
-    Please cite: Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., Nasmyth, K. & Davis, I. (2010) ParticleStats: open source software for the analysis of particle motility. <I>Nucl. Acids Res. Web Server Edition</I> <A HREF='http://dx.doi.org/10.1093/nar/GKQ542' STYLE='text-decoration: none;'>[DOI]</A>
+    <TR><TD COLSPAN=2 ALIGN=left><FONT FACE='sans,arial' SIZE=2 COLOR=black>
+<B>Please cite:</B> 
+Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., Nasmyth, K. & Davis, I. (2010) ParticleStats: open source software for the analysis of particle motility. <I>Nucl. Acids Res. Web Server Edition</I> <A HREF='http://dx.doi.org/10.1093/nar/GKQ542' STYLE='text-decoration: none;'>[DOI]</A>
     </TD></TR></TABLE> <P>
 
-    <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
-    <TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>
-    <A HREF='http://www.opensource.org/docs/definition.php'>
-    <IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png'
-    border=0 width=72 height=60></a></TD>
-    <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>GNU License<BR>
-    <A HREF='http://www.gnu.org'>
-    <IMG SRC='https://www.gnu.org/graphics/heckert_gnu.png' HEIGHT=60  BORDER=0></A>
-    </TD></TR>
-  </TABLE>
+  <TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>
+    <TR><TD COLSPAN=2 ALIGN=left><FONT FACE='sans,arial' SIZE=2 COLOR=black>
+<B>History:</B><BR>
+ParticleStats was originally created by Russell Hamilton and <A HREF='http://www.ilandavis.com' STYLE='TEXT-DECORATION: NONE'>Ilan Davis</A> at the <A HREF='http://www.bioch.ox.ac.uk' STYLE='TEXT-DECORATION: NONE'>Department of Biochemistry, University of Oxford</A> and in collaboration with the <A HREF='http://www.micron.ox.ac.uk' STYLE='TEXT-DECORATION: NONE'>Micron Advanced Imaging Facility</A>.
+<P>
+<B>Contributions:</B><BR>
+Malwina Prater, Graeme Ball, Richard Parton, Alexandra Ashcroft, Ben Shaw 
+    </TD></TR></TABLE> <P>
+
+
 </BODY>
 </HTML>
 END_HTML
@@ -779,6 +794,7 @@ sub Print_HTML
   if (defined $DirRand)
     {
       my $webpage_run = get_index_html ($Output, 'UA-39620323-3');
+      $webpage_run =~ s/^Content-Type:.*//g;
       open (WEBPAGE, ">", "$uploaddir/$DirRand/index.html");
       print WEBPAGE $webpage_run;
       close WEBPAGE;

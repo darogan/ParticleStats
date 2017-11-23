@@ -58,17 +58,25 @@ parser.add_option("--outhtml", metavar="OUTPUTHTML",
                   dest="OutputHTML",
                   help="Specify a web location for the HTML output")
 parser.add_option("--outdir", metavar="OUTPUTDIR",
-                  dest="OutputDir",
+                  dest="OutputDir", default="Results",
                   help="Specify a directory for the output files")
 parser.add_option("-g", "--graphs",
                   dest="graphs", action="store_true",
                   help="print graphs")
-
+parser.add_option("--imagesearchpath", metavar="IMAGESEARCHPATH",
+                  dest="ImageSearchPath",
+                  help="Specify a directory containing the arena blank images for the experiment")
+parser.add_option("--pixelratio", metavar="PIXELRATIO",
+                  dest="PixelRatio", default="1.00",
+                  help="Pixel Ratio (nm per pixel): DEFAULT=1.00")
 parser.add_option("-d", "--debug",
                   dest="debug", action="store_true",
                   help="print full debug output")
 (options, args) = parser.parse_args()
 
+
+
+print "pixelRatio=", options.PixelRatio
 
 
 #ERROR CHECK
@@ -147,6 +155,14 @@ Separator = "" + ("+"*90)
 # RUN FUNCTIONS ON COORD DATA READ IN - MAIN PROGRAM LOOP
 ###############################################################################
 
+# Create specified results directory
+print PS_Inputs.Colourer(("### Creating Results Directory "+str(options.OutputDir)+" ###"),"black",\
+                          options.OutputType,"bold",FontSize_Titles)
+if not os.path.exists(options.OutputDir):
+	os.makedirs(options.OutputDir)
+
+
+
 RealAllRuns  = []
 RealAllRunsX = []
 RunsHash     = []
@@ -176,7 +192,7 @@ while coordset < len(FDs):
 	i = 0
 	while i < len(FDs[coordset]['Coords']): #cycle through sheets
 
-		print "Sheet: ", i, " ", len(FDs[coordset]['Coords'][i])
+		print "Sheet: ", int(i+1), " ", len(FDs[coordset]['Coords'][i])
 
 		print "Trail:"
 		print "\t", FDs[coordset]['Coords'][i][0]
@@ -184,13 +200,13 @@ while coordset < len(FDs):
 
 
 		options.trails      = 1
-		options.PixelRatio  = 1
 		Regression          = 0
-		ImageFileSearchPath = "/storage/Russell/Hackathon/zebrafish"
+		#ImageFileSearchPath = "/storage/Russell/Hackathon/zebrafish/Exp_1_170525/"
+		ImageFileSearchPath = options.ImageSearchPath
 		# Perform Trail drawing
 		IMG_Trails = ""
 		if( options.trails):
-			ArenaNum = int(1+FDs[coordset]['Coords'][i][0][3])
+			ArenaNum = int(FDs[coordset]['Coords'][i][0][3])
 			ImageFiles = ImageFileSearchPath+"/"+FDs[coordset]['Coords'][i][0][0]+"_"+str(ArenaNum)+".png"
 		else:
 			ImageFiles = ""
@@ -199,10 +215,11 @@ while coordset < len(FDs):
 
 		if( len(ImageFiles) > 0) and (options.trails):
 			FirstImage = ImageFiles
+			print "pixelRatio=", options.PixelRatio
 			TrailImage = PS_Inputs.DrawTrailsOnImageFile(FirstImage,i,\
                                      FDs[coordset]['InputFileName'],Colours[i],\
                                      FDs[coordset]['Coords'][i],\
-                                     options.PixelRatio,Regression, "/storage/Russell/Hackathon/zebrafish/Results")
+                                     options.PixelRatio,Regression,options.OutputDir)
 
 #		j = 0
 #		while j < len(FDs[coordset]['Coords'][i]): #cycle through       

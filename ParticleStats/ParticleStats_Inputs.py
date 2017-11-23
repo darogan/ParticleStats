@@ -36,7 +36,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
 ###############################################################################
 
-#import numarray as na
+import ParticleStats_Maths as PS_Maths
 import numpy as na
 import os,sys
 from PIL import Image, ImageDraw, ImageColor
@@ -132,31 +132,76 @@ def DrawExcelCoords (FileNames,Coords,Stem,Colours):
 def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
                           Regression,DirGraphs):
 
-	im = Image.open(FileName).convert("RGB")
+#	im = Image.open(FileName).convert('RGBA')
+	im = Image.new('RGBA',(1200, 800))
+	#png_info = im.info
+	print "Scale=", Scale
+	Scale = float(Scale)
+	print(im.info, im.format, im.size, im.mode)
+
+#	datas = im.getdata()
+#	newData = []
+#	for item in datas:
+#		newData.append(item)
+#	im.putdata(newData)
+
+
+	#im = Image.open(FileName)
 	draw = ImageDraw.Draw(im)
+
+	modulo = ((ParticleNo+1)%6)
+	if(modulo == 0): modulo = 6
+
+	x = 17.5 + (modulo * 85) + (modulo*2)
+	#if(modulo > 2): x = x - 5
+	#if(modulo == 6): x = x + 5
+
+	y = 50
+
+	if(ParticleNo < 6):                       y += 45  + 6
+	if(ParticleNo >= 6  and ParticleNo < 12): y += 125 + 8
+	if(ParticleNo >= 12 and ParticleNo < 18): y += 215 + 4
+	if(ParticleNo >= 18):                     y += 300 + 4
+
+	diam = (70/2)/Scale
+#	draw.ellipse((x-diam,y-diam,x+diam,y+diam), fill='white', outline ='blue')
+	print "ParticleNo=", ParticleNo, "x=", x, "y=", y,"diam", diam
+
+	XCoords = []
+	YCoords = []
+	points  = []
+	i = 0
+	while i < len(Coords):
+		XCoords.append( Coords[i][4]/Scale )
+		YCoords.append( Coords[i][5]/Scale )
+		points.append( [Coords[i][4]/Scale, Coords[i][5]/Scale] )
+
+		i += 1
+
+	x_geomean = PS_Maths.geo_mean( XCoords )
+	y_geomean = PS_Maths.geo_mean( YCoords )
+
+	print "x_geomean=", x_geomean
+	print "y_geomean=", y_geomean
+
+
+	smallestEnclosingCircle = PS_Maths.make_circle(points)
+	print "smallestEnclosingCircle=", smallestEnclosingCircle
+
+	draw.ellipse((smallestEnclosingCircle[0]-diam,
+				  smallestEnclosingCircle[1]-diam,
+                  smallestEnclosingCircle[0]+diam,
+				  smallestEnclosingCircle[1]+diam),
+                  fill=(255,255,255,0), outline ='blue')
+
+	minprint = 25000
+	maxprint = 125000
 	i = 0
 	while i < len(Coords):
 		draw.point( (Coords[i][4]/Scale, Coords[i][5]/Scale),fill=Colour )
+		if(i > minprint and i <= maxprint and ParticleNo == 1 and i % 100 == 0):
+			print ',' . join([ str(Coords[i][1]), str(Coords[i][2]), str(Coords[i][4]), str(Coords[i][5]) ])
 		i += 1
-
-
-#	print "xxxxx", Regression['Intercept'], Regression['X'], im.size
-#	c = Regression['Intercept']/Scale
-#	m = Regression['X']/Scale
-
-#	print "when x=0; y=",c
-#	print "when y=0; x=",(-c/m)
-
-#	x = 0
-#	while x < im.size[0]:
-#		y = ( m*x) + c 
-#		if y < im.size[1] and y > 0:
-#			draw.point( (x,y) , fill='white')
-#			print x, y
-#		x += 1
-
-
-
 
 #	draw.text( (5,0), "Original Image  = "+os.path.basename(FileName), fill='red')
 #	draw.text( (5,10),"Coordinates Set = "+str(CoordsSet), fill='red')
@@ -164,10 +209,11 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 #	draw.text( (5,30),"No Coordinates  = "+str(len(Coords)), fill='red')
 
 	del draw
-	OutName = DirGraphs+"/trail_" + "Coords1" + "_" + str(ParticleNo) + ".png"
-        im.save(OutName,"PNG")
-#	OutName = DirGraphs+"/trail_" + str(ParticleNo) + "_" + CoordsSet + ".svg"
-#	im.save(OutName,"SVG")
+	OutName = DirGraphs+"/trail_" + "Coords1" + "_" + str(1+ParticleNo) + ".png"
+	im.save(OutName,'PNG')
+	#im.save(OutName,**png_info)
+	#OutName = DirGraphs+"/trail_" + "Coords1" + "_" + str(ParticleNo) + ".svg"
+	#im.save(OutName,"SVG")
 
 	return OutName
 
@@ -948,7 +994,7 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 		print "PS.Inputs: ImageName,ImagePlane,Arena,X,Y,Zone,Distance,Segment"
 
 		for element in VibTestFile:
-			if( element[2] == "Arena"):
+			if( (element[2] == "Arena") and ( element[4] == "Target_location")):
 				if( num < 10):
 					print "PS.Inputs: ",
 					print ',' . join([O_Name, str(num), str(ImagePlane),

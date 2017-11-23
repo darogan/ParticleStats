@@ -1,4 +1,4 @@
-
+#!/bin/bash
 ###############################################################################
 #        ____            _   _      _      ____  _        _                   #
 #       |  _ \ __ _ _ __| |_(_) ___| | ___/ ___|| |_ __ _| |_ ___             #
@@ -36,62 +36,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
 ###############################################################################
 
-# Get the base ubuntu image for Docker
 
-FROM ubuntu:16.04
-
-
-# Install some basic ubuntu tools 
-
-RUN \
-  sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
-  apt-get update && \
-  apt-get -y upgrade && \
-  apt-get install -y build-essential && \
-  apt-get install -y software-properties-common && \
-  apt-get install -y curl python-pip git htop tree man unzip vim wget r-base && \
-  apt-get install -y python-rpy2 python-xlrd && \
-  add-apt-repository -y ppa:inkscape.dev/stable && \
-  apt-get -y update && \
-  apt-get -y install inkscape && \
-  rm -rf /var/lib/apt/lists/*
+#
+# Generate platform specific binaries
+#
 
 
-# Set environment variables.
-
-ENV HOME /root
-
-
-# Define working directory.
-
-WORKDIR /root
+${OSBUILD}="Debian-GNU-Linux-8-jessie"
+#${OSBUILD}="Ubuntu-16.04.3-LTS"
 
 
-# Install some python packages required by ParticleStats
+cd scripts/
 
-RUN \
-  pip install --upgrade pip && \
-  pip install pillow scipy boot xlwt matplotlib
-
-
-# Install ParticleStats
-
-RUN \
-  cd /root && \
-  git clone https://github.com/darogan/ParticleStats && \
-  cd ParticleStats && \
-  python setup.py install
-
-
-# Install required CircStats R library
-
-RUN \
-  cd /root && \
-  wget https://cran.r-project.org/src/contrib/CircStats_0.2-4.tar.gz && \ 
-  R CMD INSTALL CircStats_0.2-4.tar.gz && \
-  rm CircStats_0.2-4.tar.gz
-
-
-# Define default command.
-CMD ["bash"]
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Behavioral_${OSBUILD}     --onefile ParticleStats_Behavioral.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Compare_${OSBUILD}        --onefile ParticleStats_Compare.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Directionality_${OSBUILD} --onefile ParticleStats_Directionality.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Kymographs_${OSBUILD}     --onefile ParticleStats_Kymographs.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name TrackAlign_${OSBUILD}                   --onefile TrackAlign.py
 
