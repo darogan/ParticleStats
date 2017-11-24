@@ -119,7 +119,11 @@ if(options.OutputType == "html"):
 PS_Outputs.Print_Welcome(options.OutputType,FontSize_Text)
 
 if(options.OutputDir):
-        BaseDir = str(options.OutputDir)
+	BaseDir = str(options.OutputDir)
+	if not os.path.exists(BaseDir):
+		os.makedirs(BaseDir)
+
+
 else:
         BaseDir = ""
 
@@ -246,8 +250,9 @@ while i < len(Data):
 		#Time Points
 		y = 0
 		while y < len(IMPixels[0]):
-			
-			outputfile = open(str(BaseDir)+"/ps_kymo.data",'a')
+			writepath  = str(BaseDir)+"/ps_kymo.data"
+			mode       = 'a' if os.path.exists(writepath) else 'w'
+			outputfile = open(writepath,mode)
 			outty = "";
 			if (Data[i][1][j][1]*(y) == 60) or (Data[i][1][j][1]*(y) == 90):
 				outty = outty + (str(Data[i][1][j][0])+"\t"+\

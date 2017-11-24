@@ -12,9 +12,9 @@
 #                                                                             #
 #       Contact: Russell.Hamilton@bioch.ox.ac.uk                              #
 #                http://www.ParticleStats.com                                 #
-#                Department of Biochemistry, South Parks Road,                #
-#                University of Oxford OX1 3QU                                 #
-#       Copyright (C) 2010 Russell S. Hamilton                                #
+#                Centre for Trophoblast Research,                             #
+#                University of Cambridge                                      #
+#       Copyright (C) 2017 Russell S. Hamilton                                #
 #                                                                             #
 #       Please cite:                                                          #
 #       Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       #
@@ -40,20 +40,11 @@ import numpy as na
 import os,sys,math
 from decimal import *
 import random
-#import Scientific.Statistics as SciPy
 import scipy
-#from Scientific.Geometry import Vector
-#from Scientific.Geometry.VectorModule import Vector 
+from scipy import stats
 import ParticleStats_Outputs as PS_Outputs
-#import rpy
-#from rpy import r
 from PIL import Image
 import re
-#r.library("circular")
-#r.library("CircStats")
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr 
-import rpy2.rpy_classic as rpy
 
 #------------------------------------------------------------------------------
 def geo_mean(iterable):
@@ -531,43 +522,27 @@ def Stats_TTests (Runs1, Runs2):
                         Distance_2.append(Runs2[j][3])
                 j += 1
 
-	import rpy2.robjects
-	rSpeeds_1   = robjects.FloatVector(Speeds_1)
-	rSpeeds_2   = robjects.FloatVector(Speeds_2)
-	rDistance_1 = robjects.FloatVector(Distance_1)
-	rDistance_2 = robjects.FloatVector(Distance_2)
-
-	print " + T-Test comparison of run speed and distance distributions"
+	print "+ T-Test comparison of run speed and distance distributions"
+	print " Performs a standard independent 2 sample test assuming equal population variances" 
+	t_t_speed, t_p_speed = stats.ttest_ind(Speeds_1, Speeds_2, equal_var=False)
 	print " Speed Comparisons "
-	print " t                   =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[0][0]
-	print " df                  =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[1][0]
-	print " p-value             =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[2][0]
-	print " confidence interval =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[3][0],\
-					robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[3][1]
-	print " mean of x           =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[4][0]
-	print " mean of y           =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[4][1] 
-	print " hypothesis          =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[6][0]
-	print " test type           =", robjects.r['t.test'](rSpeeds_1,rSpeeds_2)[7][0]
+	print " t                   =", t_t_speed 
+	print " p-value             =", t_p_speed
+	t_t_distance, t_p_distance = stats.ttest_ind(Distance_1, Distance_2, equal_var=False)
 	print " Distance Comparisons "
-        print " t                   =", robjects.r['t.test'](rDistance_1,rDistance_2)[0][0]
-        print " df                  =", robjects.r['t.test'](rDistance_1,rDistance_2)[1][0]
-        print " p-value             =", robjects.r['t.test'](rDistance_1,rDistance_2)[2][0]
-        print " confidence interval =", robjects.r['t.test'](rDistance_1,rDistance_2)[3][0],\
-                                        robjects.r['t.test'](rDistance_1,rDistance_2)[3][1]
-        print " mean of x           =", robjects.r['t.test'](rDistance_1,rDistance_2)[4][0]
-        print " mean of y           =", robjects.r['t.test'](rDistance_1,rDistance_2)[4][1]        
-        print " hypothesis          =", robjects.r['t.test'](rDistance_1,rDistance_2)[6][0]
-        print " test type           =", robjects.r['t.test'](rDistance_1,rDistance_2)[7][0]
-	
-	#print " + Kolmogorov-Smirnov Tests"
-	#print " Speed Comparisons "
-	#print "   D KS-statistic = ", robjects.r['ks.test'](rSpeeds_1,rSpeeds_2,alternative="t")[0][0]
-	#print "   P-Value        = ", robjects.r['ks.test'](rSpeeds_1,rSpeeds_2)[1][0]
-	#print "   alt hypothesis = ", robjects.r['ks.test'](rSpeeds_1,rSpeeds_2)[2]
-	#print " Distance Comparisons "
-        #print "   D KS-statistic = ", robjects.r['ks.test'](rDistance_1,rDistance_2)[0][0]
-        #print "   P-Value        = ", robjects.r['ks.test'](rDistance_1,rDistance_2)[1][0]
-        #print "   alt hypothesis = ", robjects.r['ks.test'](rDistance_1,rDistance_2)[2][0]
+	print " t                   =", t_t_distance
+	print " p-value             =", t_p_distance
+
+	print "+ Kolmogorov-Smirnov Tests"
+	print " Speed Comparisons "
+	ks_s_speed,ks_t_speed = stats.ks_2samp(Speeds_1, Speeds_2)
+	print "   D KS-statistic = ", ks_s_speed
+	print "   P-Value        = ", ks_t_speed
+	print " Distance Comparisons "
+	ks_s_distance,ks_t_distance = stats.ks_2samp(Distance_1, Distance_2)
+	print "   D KS-statistic = ", ks_s_distance
+	print "   P-Value        = ", ks_t_distance
+
 	return Output
 
 #------------------------------------------------------------------------------
@@ -696,37 +671,39 @@ def ChiSquare (Mode):
 	return dave
 
 #------------------------------------------------------------------------------
-def CalcRegression (Coords):
-
-	x = []; y =[]
-	Regression = {}
-	i = 0
-	while i < len(Coords):
-		x.append(Coords[i][4])
-		y.append(Coords[i][5])
-		i += 1
-
-	rpy.set_default_mode(rpy.NO_CONVERSION)
-	linear_model = r.lm(r("y ~ x"), data = r.data_frame(x=x, y=y))
-	rpy.set_default_mode(rpy.BASIC_CONVERSION)
-
-	#print "+++++", linear_model.as_py()['coefficients']['x']
-
-	Regression['X']         = linear_model.as_py()['coefficients']['x']
-	Regression['Intercept'] = linear_model.as_py()['coefficients']['(Intercept)']
-	Regression['R2']        = r.summary(linear_model)['r.squared']
-	Regression['aR2']       = r.summary(linear_model)['adj.r.squared']
-
-	x = []; y = []
-
-	return Regression
-
+#def CalcRegression (Coords):
+#
+# 20171123: removed to du R dependencies
+#
+#	x = []; y =[]
+#	Regression = {}
+#	i = 0
+#	while i < len(Coords):
+#		x.append(Coords[i][4])
+#		y.append(Coords[i][5])
+#		i += 1
+#
+#	rpy.set_default_mode(rpy.NO_CONVERSION)
+#	linear_model = r.lm(r("y ~ x"), data = r.data_frame(x=x, y=y))
+#	rpy.set_default_mode(rpy.BASIC_CONVERSION)
+#
+#	#print "+++++", linear_model.as_py()['coefficients']['x']
+#
+#	Regression['X']         = linear_model.as_py()['coefficients']['x']
+#	Regression['Intercept'] = linear_model.as_py()['coefficients']['(Intercept)']
+#	Regression['R2']        = r.summary(linear_model)['r.squared']
+#	Regression['aR2']       = r.summary(linear_model)['adj.r.squared']
+#
+#	x = []; y = []
+#
+#	return Regression
+#
 #------------------------------------------------------------------------------
 def CalcRayleighTest (TrailVectors):
-
-	from rpy2.robjects import r
-	r.library("CircStats")
-
+#
+# 20171124: modifued to replace calls to R package CircStats with pure python 
+# AstroPy for calcualting circulat statistics - simplifies dependencies.
+#
 	Angle   = []
 	Radians = []
 	Mags    = []
@@ -737,24 +714,45 @@ def CalcRayleighTest (TrailVectors):
 		Mags.append(  CalculateVectorMagnitude( TrailVectors[i] ))
 		i += 1
 
-	rRadians  = robjects.FloatVector(Radians)
-	circ_mean = robjects.r['circ.mean'](rRadians)
-	print "-------------------------------------------------------------"
-	print "+ Circular Mean: %.2f"%(robjects.r['deg'](circ_mean)[0]), " degrees ",	
-	print "(rho = %.2f)"%(robjects.r['circ.summary'](rRadians)[2][0])
-	print "+ Circular Dispersion:  n=%d r=%.2f rbar=%.2f var=%.2f"%( \
-	      robjects.r['circ.disp'](rRadians)[0][0],\
-	      robjects.r['circ.disp'](rRadians)[1][0],\
-	      robjects.r['circ.disp'](rRadians)[2][0],\
-	      robjects.r['circ.disp'](rRadians)[3][0])
-	print "+ Rayleigh test of uniformity: rbar=%.2f pvalue=%.2e"%(\
-	       robjects.r['r.test'](rRadians)[0][0],\
-	       robjects.r['r.test'](rRadians)[1][0])
-        print "+ est.kappa: %.2f"%(robjects.r['est.kappa'](rRadians)[0])
-	print "+", robjects.r['kuiper'](rRadians)
-	print "+", robjects.r['watson'](rRadians, dist="uniform")
-	print "+", robjects.r['watson'](rRadians, dist="vm")
-	print "-------------------------------------------------------------"
+#	from rpy2.robjects import r
+#	r.library("CircStats")
+#	rRadians  = robjects.FloatVector(Radians)
+#	circ_mean = robjects.r['circ.mean'](rRadians)
+#	print "-------------------------------------------------------------"
+#	print "+ Circular Mean: %.2f"%(robjects.r['deg'](circ_mean)[0]), " degrees ",	
+#	print "(rho = %.2f)"%(robjects.r['circ.summary'](rRadians)[2][0])
+#	print "+ Circular Dispersion:  n=%d r=%.2f rbar=%.2f var=%.2f"%( \
+#	      robjects.r['circ.disp'](rRadians)[0][0],\
+#	      robjects.r['circ.disp'](rRadians)[1][0],\
+#	      robjects.r['circ.disp'](rRadians)[2][0],\
+#	      robjects.r['circ.disp'](rRadians)[3][0])
+#	print "+ Rayleigh test of uniformity: rbar=%.2f pvalue=%.2e"%(\
+#	       robjects.r['r.test'](rRadians)[0][0],\
+#	       robjects.r['r.test'](rRadians)[1][0])
+#        print "+ est.kappa: %.2f"%(robjects.r['est.kappa'](rRadians)[0])
+#	print "+", robjects.r['kuiper'](rRadians)
+#	print "+", robjects.r['watson'](rRadians, dist="uniform")
+#	print "+", robjects.r['watson'](rRadians, dist="vm")
+#	print "-------------------------------------------------------------"
+
+
+	from astropy.stats import circmean, circvar, circmoment, rayleightest, vtest, vonmisesmle
+	npRadians                        = na.array( Radians )
+	circmean                         = abs( math.degrees(circmean(npRadians)) )
+	circvar                          = circvar(npRadians)
+	circmoment_deg,circmoment_len    = circmoment(npRadians) 
+	circmoment_deg                   = abs( math.degrees(circmoment_deg) )
+	rayleightest                     = rayleightest(npRadians) 
+	vtest                            = vtest(npRadians)
+	vonmisesmle_mu,vonmisesmle_kappa = vonmisesmle(npRadians)
+	vonmisesmle_mu                   = abs( math.degrees(vonmisesmle_mu) )
+
+	print "+ Circular Mean          : %.2f"%(circmean), "degrees"
+	print "+ Circular Variance      : %.6f"%(circvar)
+	print "+ Circular Moment        : %.2f degrees, %.6f length of moment"%(circmoment_deg,circmoment_len)
+	print "+ Circular Rayleigh Test : %.4e"%(rayleightest), "p.value"
+	print "+ Circular VTest         :", vtest, "p.value (where alt hypothesis assumed to have known mean angle)";
+	print "+ Circular Von Mises MLE : %.2f degrees(mu), %.2f concentration(kappa)"%(vonmisesmle_mu,vonmisesmle_kappa)
 
 #------------------------------------------------------------------------------
 def Standard_Dev_Error (Data):
@@ -2523,26 +2521,40 @@ def Regression_CVersion (Coords,X,Y):
 
 #------------------------------------------------------------------------------
 def KymoRegression (Coords,X,Y):
-
+#
+# 20171123: replaced calls to baseR with scipy for calcualting linear regression
+#
 	x = []; y =[]
-        Regression = {}
-        i = 0
-        while i < len(Coords):
-        	x.append(Coords[i][X])
-                y.append(Coords[i][Y])
-                i += 1
+	Regression = {}
+	i = 0
+	while i < len(Coords):
+		x.append(Coords[i][X])
+		y.append(Coords[i][Y])
+		i += 1
 
-	r = robjects.r
-	robjects.globalenv["roX"] = robjects.FloatVector( x )                
-	robjects.globalenv["roY"] = robjects.FloatVector( y )
+#	import rpy2.robjects as robjects
+#	from rpy2.robjects.packages import importr 
+#	import rpy2.rpy_classic as rpy
+#	r = robjects.r
+#	robjects.globalenv["roX"] = robjects.FloatVector( x )                
+#	robjects.globalenv["roY"] = robjects.FloatVector( y )
+#	stats = importr('stats')                       
+#	linear_model = stats.lm("roY ~ roX")           
+#	Regression['X']         = linear_model.rx2('coefficients')[1]
+#	Regression['Intercept'] = linear_model.rx2('coefficients')[0]
+#	Regression['R2']        = r.summary(linear_model)[7][0]
+#	Regression['aR2']       = r.summary(linear_model)[8][0]
+#	print Regression['X'], Regression['Intercept'], Regression['R2'], Regression['aR2'] 
 
-        stats = importr('stats')                       
-        linear_model = stats.lm("roY ~ roX")           
+	from scipy import stats
+	slope, intercept, r_value, p_value, std_err = stats.linregress(na.array(x),na.array(y))
+	r_squared = r_value**2
 
-        Regression['X']         = linear_model.rx2('coefficients')[1]
-        Regression['Intercept'] = linear_model.rx2('coefficients')[0]
-	Regression['R2']        = r.summary(linear_model)[7][0]
-	Regression['aR2']       = r.summary(linear_model)[8][0]
+	Regression['X']         = slope 
+	Regression['Intercept'] = intercept
+	Regression['R2']        = r_squared
+	Regression['PValue']    = p_value
+	Regression['StdErr']    = std_err 
 
 	return Regression
 
