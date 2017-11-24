@@ -599,17 +599,20 @@ def CalculateEVDParameters (MaxSimilarities):
 		i += 1
 
 	from scipy.stats import genextreme
-	gev_shape,gev_loc,gev_scale = genextreme.fit( sorted(MaxSimilarities) )	
-	print "scipy: shape=", abs(gev_shape), " loc=", gev_loc, " scale=", gev_scale
+	import warnings
+	with warnings.catch_warnings():
+		warnings.simplefilter("ignore")
+		gev_shape,gev_loc,gev_scale = genextreme.fit( sorted(MaxSimilarities) )	
 
-	Xi    = abs(gev_shape)
-	Mu    = gev_loc
-	Sigma = gev_scale
+	print "scipy: shape=", gev_shape, " loc=", gev_loc, " scale=", gev_scale
 
+	Xi     = abs(gev_shape)
+	Mu     = gev_loc
+	Sigma  = gev_scale
+	eXi    = 0
+	eMu    = 0
+	eSigma = 0
 
-	Xi=6.7196; Mu=1.7095; Sigma=11.4874; eXi=0; eMu=0; eSigma=0
-
-	
 	return (Xi,Mu,Sigma,eXi,eMu,eSigma)
 
 #------------------------------------------------------------------------------
