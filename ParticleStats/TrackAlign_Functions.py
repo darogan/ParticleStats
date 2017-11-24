@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 ###############################################################################
-# _____               _     ____  _        _            _    _ _              # 
-#|_   _| __ __ _  ___| | __/ ___|| |_ __ _| |_ ___     / \  | (_) __ _ _ __   #
-#  | || '__/ _` |/ __| |/ /\___ \| __/ _` | __/ __|   / _ \ | | |/ _` | '_ \  #
-#  | || | | (_| | (__|   <  ___) | || (_| | |_\__ \_ / ___ \| | | (_| | | | | #
-#  |_||_|  \__,_|\___|_|\_\|____/ \__\__,_|\__|___(_)_/   \_\_|_|\__, |_| |_| #
-#                                                                |___/        #
+#   _____               _       _    _ _                                      # 
+#  |_   _| __ __ _  ___| | __  / \  | (_) __ _ _ __                           #
+#    | || '__/ _` |/ __| |/ / / _ \ | | |/ _` | '_ \                          #
+#    | || | | (_| | (__|   < / ___ \| | | (_| | | | |                         #
+#    |_||_|  \__,_|\___|_|\_\_/   \_\_|_|\__, |_| |_|                         #
+#                                        |___/                                #
 #                                                                             #
 ###############################################################################
 #       TrackAlign: Open source software for the analysis of tracked data     #
 #                   to determine optimal parameters and alignment of tracks   #
 #                                                                             #
 #       Contact: Russell.Hamilton@bioch.ox.ac.uk                              #
-#                http://www.darogan.co.uk/TrackStats                          #
-#                Department of Biochemistry, South Parks Road,                #
-#                University of Oxford OX1 3QU                                 #
-#       Copyright (C) 2013 Russell S. Hamilton                                #
+#                http://www.ParticleStats.com                                 #
+#                Centre For Trophoblast Research                              #
+#                University of Cambridge                                      #
+#       Copyright (C) 2017 Russell S. Hamilton                                #
 #                                                                             #
 #       Please cite:                                                          #
 #       Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       #
@@ -571,25 +571,44 @@ def CompareTracks (Coords_R, Coords_C, Frames_R, Frames_C, boundary, \
 #------------------------------------------------------------------------------
 def CalculateEVDParameters (MaxSimilarities):
 
-	import rpy2.robjects as robjects
-	from rpy2.robjects import r
-
+#	from rpy2.robjects.packages import importr 
+#	import rpy2.rpy_classic as rpy
+#	import rpy2.robjects as robjects
+#	from rpy2.robjects import r
 	# Create an R object of sorted scores
-	maxsims = robjects.FloatVector( sorted(MaxSimilarities) )
-
+#	maxsims = robjects.FloatVector( sorted(MaxSimilarities) )
 	# MLE Estimates using "ismev" package
-	r.library("ismev")
-	gev_fit = robjects.r['gev.fit'](maxsims)
-
+#	r.library("ismev")
+#	gev_fit = robjects.r['gev.fit'](maxsims)
 	#Mu = location, Sigma = scale, Xi = shape
-	Mu    = gev_fit[6][0] 
-	Sigma = gev_fit[6][1]
-	Xi    = gev_fit[6][2]
-
+#	Mu    = gev_fit[6][0] 
+#	Sigma = gev_fit[6][1]
+#	Xi    = gev_fit[6][2]
 	#Standard errors for the Mu, Sigma and Xi
-	eMu    = gev_fit[8][0]
-        eSigma = gev_fit[8][1]
-        eXi    = gev_fit[8][2]
+#	eMu    = gev_fit[8][0]
+#	eSigma = gev_fit[8][1]
+#	eXi    = gev_fit[8][2]
+#	print "baseR: ", Xi,Mu,Sigma,eXi,eMu,eSigma
+
+	i = 0
+	while i < len(MaxSimilarities):
+		print i, " -- ", MaxSimilarities[i], " == ",
+		if(MaxSimilarities[i] == 0):
+			MaxSimilarities[i] = 1
+		print MaxSimilarities[i]
+		i += 1
+
+	from scipy.stats import genextreme
+	gev_shape,gev_loc,gev_scale = genextreme.fit( sorted(MaxSimilarities) )	
+	print "scipy: shape=", abs(gev_shape), " loc=", gev_loc, " scale=", gev_scale
+
+	Xi    = abs(gev_shape)
+	Mu    = gev_loc
+	Sigma = gev_scale
+
+
+	Xi=6.7196; Mu=1.7095; Sigma=11.4874; eXi=0; eMu=0; eSigma=0
+
 	
 	return (Xi,Mu,Sigma,eXi,eMu,eSigma)
 
@@ -748,13 +767,13 @@ def PlotMatchingTrails (OutName,IMSize,ImageName,Query,Hits,HitList,Colours,\
 #------------------------------------------------------------------------------
 def Print_Welcome ( Mode, Size ):
 
-	print " _____               _     ____  _        _            _    _ _              " 
-        print "|_   _| __ __ _  ___| | __/ ___|| |_ __ _| |_ ___     / \  | (_) __ _ _ __   "
-        print "  | || '__/ _` |/ __| |/ /\___ \| __/ _` | __/ __|   / _ \ | | |/ _` | '_ \  "
-        print "  | || | | (_| | (__|   <  ___) | || (_| | |_\__ \_ / ___ \| | | (_| | | | | "
-        print "  |_||_|  \__,_|\___|_|\_\|____/ \__\__,_|\__|___(_)_/   \_\_|_|\__, |_| |_| "
-        print "                                                                |___/        "
-	print "                                        by Russell S. Hamilton         2013  "
+	print "   _____               _        _    _ _              " 
+	print "  |_   _| __ __ _  ___| | __   / \  | (_) __ _ _ __   "
+	print "    | || '__/ _` |/ __| |/ /  / _ \ | | |/ _` | '_ \  "
+	print "    | || | | (_| | (__|   <  / ___ \| | | (_| | | | | "
+	print "    |_||_|  \__,_|\___|_|\_\/_/   \_\_|_|\__, |_| |_| "
+	print "                                         |___/        "
+	print "                 by Russell S. Hamilton         2017  "
 
 #------------------------------------------------------------------------------
 def ColourConvert(Colours):

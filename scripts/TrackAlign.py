@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 ###############################################################################
-# _____               _     ____  _        _            _    _ _              # 
-#|_   _| __ __ _  ___| | __/ ___|| |_ __ _| |_ ___     / \  | (_) __ _ _ __   #
-#  | || '__/ _` |/ __| |/ /\___ \| __/ _` | __/ __|   / _ \ | | |/ _` | '_ \  #
-#  | || | | (_| | (__|   <  ___) | || (_| | |_\__ \_ / ___ \| | | (_| | | | | #
-#  |_||_|  \__,_|\___|_|\_\|____/ \__\__,_|\__|___(_)_/   \_\_|_|\__, |_| |_| #
-#                                                                |___/        #
+#   _____               _       _    _ _                                      # 
+#  |_   _| __ __ _  ___| | __  / \  | (_) __ _ _ __                           #
+#    | || '__/ _` |/ __| |/ / / _ \ | | |/ _` | '_ \                          #
+#    | || | | (_| | (__|   < / ___ \| | | (_| | | | |                         #
+#    |_||_|  \__,_|\___|_|\_\_/   \_\_|_|\__, |_| |_|                         #
+#                                        |___/                                #
 #                                                                             #
 ###############################################################################
 #       TrackAlign: Open source software for the analysis of tracked data     #
 #                   to determine optimal parameters and alignment of tracks   #
 #                                                                             #
-#       Contact: Russell.Hamilton@bioch.ox.ac.uk                              #
-#                http://www.darogan.co.uk/TrackStats                          #
-#                Department of Biochemistry, South Parks Road,                #
-#                University of Oxford OX1 3QU                                 #
-#       Copyright (C) 2013 Russell S. Hamilton                                #
+#       Contact: rsh46@cam.ac.uk                                              #
+#                http://www.ParticleStats.com                                 #
+#                Centre for Trophoblast Research                              #
+#                University of Cambridge                                      #
+#       Copyright (C) 2017 Russell S. Hamilton                                #
 #                                                                             #
 #       Please cite:                                                          #
 #       Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       #
@@ -465,6 +465,9 @@ print "  location = %8.4f se = %8.4f"%(Mu, eMu)
 print "  scale    = %8.4f se = %8.4f"%(Sigma,eSigma)
 print "  shape    = %8.4f se = %8.4f"%(Xi,eXi)
 print PS_Inputs.Colourer(Separator,"grey",options.OutputType,"",FontSize_Text)
+
+
+sys.exit()
 
 if options.Polygon:
 

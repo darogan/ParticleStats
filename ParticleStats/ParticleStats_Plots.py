@@ -12,9 +12,9 @@
 #                                                                             #
 #       Contact: Russell.Hamilton@bioch.ox.ac.uk                              #
 #                http://www.ParticleStats.com                                 #
-#                Department of Biochemistry, South Parks Road,                #
-#                University of Oxford OX1 3QU                                 #
-#       Copyright (C) 2010 Russell S. Hamilton                                #
+#                Centre For Trophoblast Research                              #
+#                University of Cambridge                                      #
+#       Copyright (C) 2017 Russell S. Hamilton                                #
 #                                                                             #
 #       Please cite:                                                          #
 #       Hamilton, R.S. et al (2010) Nucl. Acids Res. Web Server Edition       #
