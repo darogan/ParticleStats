@@ -199,7 +199,7 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 	i = 0
 	while i < len(Coords):
 		draw.point( (Coords[i][4]/Scale, Coords[i][5]/Scale),fill=Colour )
-		if(i > minprint and i <= maxprint and ParticleNo == 1 and i % 100 == 0):
+		if(i > minprint and i <= maxprint and ParticleNo == 5 and i % 100 == 0):
 			print ',' . join([ str(Coords[i][1]), str(Coords[i][2]), str(Coords[i][4]), str(Coords[i][5]) ])
 		i += 1
 

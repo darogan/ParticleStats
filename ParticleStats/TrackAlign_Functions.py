@@ -703,7 +703,7 @@ def GenerateRandomCoords (Coords,Frames,Type,ntrails,imagesize,NoiseAmount,\
 
 #------------------------------------------------------------------------------
 def PlotMatchingTrails (OutName,IMSize,ImageName,Query,Hits,HitList,Colours,\
-			Polygon,PolygonColour):
+						Polygon,PolygonColour):
 
 	OutName = OutName+"_Hits"
 	scene   = Scene(OutName,IMSize[0],IMSize[1])
@@ -727,15 +727,25 @@ def PlotMatchingTrails (OutName,IMSize,ImageName,Query,Hits,HitList,Colours,\
 		print "SUB:", i, HitList[i], Hits[HitList[i]][0][4], Hits[HitList[i]][0][5], Hits[HitList[i]][-1][4], Hits[HitList[i]][-1][5]
 		i += 1
 
+
+	i = 0
+	while i < len(Hits):
+		print "sub:", i, Hits[i][0][4], Hits[i][0][5], Hits[i][-1][4], Hits[i][-1][5]
+		i += 1
+
 	# Print the reference trail in black, with green/red circles at ends
+
+	scene.add(Circle((Query[0][4],Query[0][5]),1,0,0,(0,255,0),0.5))
+	scene.add(Line((Query[0][4],Query[0][5]), (Query[-1][4], Query[-1][5]),(255,0,0),1,0.5))
+	scene.add(Circle((Query[-1][4], Query[-1][5]),1,0,0,(255,0,0),0.5))
+
 #	i = 0
 #	while i < len(Results[0][0]):
 #		if i == 0:
-#			scene.add(Circle((Results[0][0][i][0],Results[0][0][i][1]),\
-#        	                                  1,0,0,(0,255,0),0.5))
-#		#if i == (len(Results[0][0])-1):
-#		#	scene.add(Circle((Results[0][0][i][0],Results[0][0][i][1]),\
-#		#				1,0,0,(255,0,0),0.5))
+#			scene.add(Circle((Results[0][0][i][0],Results[0][0][i][1]),1,0,0,(0,255,0),0.5))
+		#if i == (len(Results[0][0])-1):
+		#	scene.add(Circle((Results[0][0][i][0],Results[0][0][i][1]),\
+		#				1,0,0,(255,0,0),0.5))
 #		if i > 0:
 #			scene.add(Line((Results[0][0][i-1][0],Results[0][0][i-1][1]),\
 #					(Results[0][0][i][0],Results[0][0][i][1]),\
@@ -743,6 +753,25 @@ def PlotMatchingTrails (OutName,IMSize,ImageName,Query,Hits,HitList,Colours,\
 #		i += 1
 
 	# Print the matching trails
+	i = 1
+	while i < len(HitList):
+		RGB = ColourConvert(Colours[i])
+
+		j = 0
+		while j < len(Hits[HitList[i]]):
+
+			if j == 0:
+				scene.add(Circle((Hits[HitList[i]][j][4], Hits[HitList[i]][j][5]),0.5,0,0,(0,255,0),0.5))
+			if j == (len(Hits[HitList[i]])-1):
+				scene.add(Circle((Hits[HitList[i]][j][4], Hits[HitList[i]][j][5]),0.5,0,0,(255,0,0),0.5))
+			if j > 0:
+				scene.add(Line((Hits[HitList[i]][j-1][4],Hits[HitList[i]][j-1][5]),\
+                               (Hits[HitList[i]][j][4],  Hits[HitList[i]][j][5]),\
+                                         (RGB[0],RGB[1],RGB[2]),0.5,0.5))
+			j += 1
+
+		i += 1
+
 #	i = 1
 #	while i < len(Results):
 #		RGB = ColourConvert(Colours[i])
@@ -756,7 +785,7 @@ def PlotMatchingTrails (OutName,IMSize,ImageName,Query,Hits,HitList,Colours,\
 #			#		  0.5,0,0,(255,0,0),0.5))
 #			if j > 0:
 #				scene.add(Line((Results[i][0][j-1][0],Results[i][0][j-1][1]),\
-#                                         (Results[i][0][j][0],Results[i][0][j][1]),\
+#                                        (Results[i][0][j][0],Results[i][0][j][1]),\
 #                                         (RGB[0],RGB[1],RGB[2]),0.5,0.5))
 #			j += 1
 #

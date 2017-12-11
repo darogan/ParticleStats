@@ -467,8 +467,6 @@ print "  shape    = %8.4f se = %8.4f"%(Xi,eXi)
 print PS_Inputs.Colourer(Separator,"grey",options.OutputType,"",FontSize_Text)
 
 
-sys.exit()
-
 if options.Polygon:
 
 	cnt_ROI_R = 0
