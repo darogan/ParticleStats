@@ -160,13 +160,13 @@ if options.SquareColours != "angle" and options.SquareColours != "speed":
 	print "ERROR: SquareColours is not set to the allowed options of angle or speed"
 	sys.exit(0)
 
-print "SquareColoursSpeedRangeMin=", options.SquareColoursSpeedRangeMin
+#print "SquareColoursSpeedRangeMin=", options.SquareColoursSpeedRangeMin
 SquareColoursSpeedRangeMin = int(options.SquareColoursSpeedRangeMin)
 if SquareColoursSpeedRangeMin < 0 or SquareColoursSpeedRangeMin > 200:
         print "ERROR: the wind map speed min range is outside of the allowed range 1..200"
         sys.exit(0)
 
-print "SquareColoursSpeedRangeMax=", options.SquareColoursSpeedRangeMax
+#print "SquareColoursSpeedRangeMax=", options.SquareColoursSpeedRangeMax
 SquareColoursSpeedRangeMax = int(options.SquareColoursSpeedRangeMax)
 
 if SquareColoursSpeedRangeMax < 0 or SquareColoursSpeedRangeMax > 200:
@@ -276,6 +276,8 @@ Squares         = int(options.Squares)
 Factor          = math.sqrt(Squares)
 TrailsAll       = []
 TrailVectorsAll = []
+Origin          = []
+Shift           = []
 
 hyp = math.sqrt( (im.size[0]**2 + im.size[1]**2))
 FinalIMSize = PS_Maths.roundNumber(hyp,5,"UP")
@@ -314,19 +316,19 @@ while i < len(Coords):
 
 #                RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate%90)))+\
 #                            (im.size[1]*math.cos(math.radians(Rotate%90)))
-			RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate)))+\
-        	                    (im.size[1]*math.cos(math.radians(Rotate)))
-			Shifty    = ((FinalIMSize-RotImgSz)/2) + \
-    	                        ((RotImgSz/2)-(im.size[0]/2))
-			Shift     = [Shifty,Shifty]
-			Origin    = [ im.size[0]/2,im.size[1]/2 ]
+		RotImgSz  = (im.size[0]*math.sin(math.radians(Rotate)))+\
+                    (im.size[1]*math.cos(math.radians(Rotate)))
+		Shifty    = ((FinalIMSize-RotImgSz)/2) + \
+                     ((RotImgSz/2)-(im.size[0]/2))
+		Shift     = [Shifty,Shifty]
+		Origin    = [ im.size[0]/2,im.size[1]/2 ]
 
-			Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
+		Shift     = [(FinalIMSize-im.size[0])/2,(FinalIMSize-im.size[1])/2]
 
-			(Axis[0],Axis[1]) = PS_Maths.rotateXYbyAngAndOrigin(\
+		(Axis[0],Axis[1]) = PS_Maths.rotateXYbyAngAndOrigin(\
                                              Axis[0],Axis[1],Rotate,\
                                              Origin[0],Origin[1],0,Shift)
-			(Axis[2],Axis[3]) = PS_Maths.rotateXYbyAngAndOrigin(\
+		(Axis[2],Axis[3]) = PS_Maths.rotateXYbyAngAndOrigin(\
                                              Axis[2],Axis[3],Rotate,\
                                              Origin[0],Origin[1],0,Shift)
 	else:

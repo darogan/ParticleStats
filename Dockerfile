@@ -50,7 +50,7 @@ RUN \
   apt-get install -y build-essential && \
   apt-get install -y software-properties-common && \
   apt-get install -y curl python-pip git htop tree man unzip vim wget && \
-  apt-get install -y python-xlrd && \
+  apt-get install -y python-dev python-xlrd && \
   add-apt-repository -y ppa:inkscape.dev/stable && \
   apt-get -y update && \
   apt-get -y install inkscape && \
@@ -72,6 +72,7 @@ WORKDIR /root
 RUN \
   pip install --upgrade pip && \
   pip install pillow scipy boot xlwt matplotlib
+  pip install astropy --no-deps
 
 
 # Install ParticleStats
