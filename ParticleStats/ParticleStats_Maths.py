@@ -45,6 +45,7 @@ from scipy import stats
 import ParticleStats_Outputs as PS_Outputs
 from PIL import Image
 import re
+import math, random
 
 #------------------------------------------------------------------------------
 def geo_mean(iterable):
@@ -52,8 +53,13 @@ def geo_mean(iterable):
 # https://stackoverflow.com/questions/43099542/python-easy-way-to-do-geometric-mean-in-python
 # Added: 12/10/17
 
-	a = na.log(iterable)
-	return na.exp(a.sum()/len(a))
+	mn        = na.array(iterable)
+	mean      = mn.sum()/len(mn) 
+
+	a         = na.log(iterable)
+	geometric = na.exp(a.sum()/len(a))
+
+	return (mean, geometric)
 
 #------------------------------------------------------------------------------
 def roundNumber (number, roundTo, direction):
@@ -2990,6 +2996,57 @@ def getMedian(numericValues):
 
 	return (float(lower + upper)) / 2
 
+
+#------------------------------------------------------------------------------
+def ConvexHull_Points(points):
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html
+
+	from scipy.spatial import ConvexHull
+
+	convexhull          = scipy.spatial.ConvexHull(points)
+	convexhull_vertices = [points[i] for i in convexhull.vertices]
+
+	return convexhull_vertices
+
+#------------------------------------------------------------------------------
+def Polygon_Perimeter(polygon):
+# https://stackoverflow.com/questions/1401712/how-can-the-euclidean-distance-be-calculated-with-numpy
+
+	from scipy.spatial import distance
+
+	perimeter = 0
+	for i in range(len(polygon)-1):
+		perimeter += distance.euclidean(polygon[i],polygon[(i+1)])
+
+	perimeter += distance.euclidean(polygon[0],polygon[-1])
+
+	return perimeter
+
+#------------------------------------------------------------------------------
+def Polygon_Area(polygon):
+# https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
+
+	n    = len(polygon) # of points in polygon
+	area = 0.0
+
+	for i in range(n):
+		j = (i + 1) % n
+		area += polygon[i][0] * polygon[j][1]
+		area -= polygon[j][0] * polygon[i][1]
+
+	area = abs(area) / 2.0
+
+	return area
+
+#------------------------------------------------------------------------------
+def Polygon_Roundness(polygonArea, polygonPerimeter):
+# https://angeljohnsy.blogspot.com/2012/05/find-area-perimeter-centroid.html
+
+	roundness = (4 * polygonArea * math.pi) / (polygonPerimeter**2) 
+
+	return roundness
+
+#------------------------------------------------------------------------------
 # 
 # Smallest enclosing circle - Library (Python)
 # 
@@ -3010,12 +3067,7 @@ def getMedian(numericValues):
 # along with this program (see COPYING.txt and COPYING.LESSER.txt).
 # If not, see <http://www.gnu.org/licenses/>.
 # 
-
-import math, random
-
-
 # Data conventions: A point is a pair of floats (x, y). A circle is a triple of floats (center x, center y, radius).
-
 # 
 # Returns the smallest circle that encloses all the given points. Runs in expected O(n) time, randomized.
 # Input: A sequence of pairs of floats or ints, e.g. [(0,5), (3.1,-2.7)].

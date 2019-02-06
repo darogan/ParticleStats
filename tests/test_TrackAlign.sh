@@ -54,8 +54,8 @@ do
         --xls1 $DIR1/${FILES[0]} --tif $DIR1/${IMAGES[0]} \
         --xls2 $DIR1/${FILES[1]} \
         --boundaryfilter -s $j -g -r -a -o text \
-	--TimeTolerance=0 \
-	--polygon=$DIR1/$ROI \
+		--TimeTolerance=0 \
+		--polygon=$DIR1/$ROI \
         --ArrowColour=red --ROIColour=green \
         --outdir=DivisionFiles/ #> TA_results.txt
 

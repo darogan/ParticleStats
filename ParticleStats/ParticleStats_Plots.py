@@ -63,14 +63,14 @@ def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY,Orient ):
 # Created 20/05/08
 # Modifies 230608 to take account of rotation offset of image
 
-        OutName = OutName+"_original"
-        im   = Image.open(FileName).convert("RGBA")
+	OutName = OutName+"_original"
+	im   = Image.open(FileName).convert("RGBA")
 	im2  = Image.new("RGBA",(int(FinalIMSize),int(FinalIMSize)),(0,0,0,0))
 
 	pasteX = (im2.size[0]/2) - (im.size[0]/2)
-        pasteY = (im2.size[1]/2) - (im.size[1]/2)
+	pasteY = (im2.size[1]/2) - (im.size[1]/2)
 
-        im2.paste(im,(pasteX,pasteY))
+	im2.paste(im,(pasteX,pasteY))
 
 	if FlipY:
 		im2 = im2.transpose(Image.FLIP_TOP_BOTTOM)
@@ -82,7 +82,7 @@ def PlotBinaryOriginal ( FileName,OutName,AxisAngle,FinalIMSize,FlipY,Orient ):
 	im2.save(OutName+".tif","TIFF")
 	im2.save(OutName+".png","PNG")
 
-        return OutName
+	return OutName
 
 #------------------------------------------------------------------------------
 def PlotBinaryTrails_1 ( FileName,OutName,Coords,Colours,Axis,AxisAngle,\
@@ -91,7 +91,7 @@ def PlotBinaryTrails_1 ( FileName,OutName,Coords,Colours,Axis,AxisAngle,\
 # Red end points and green start points. Trail lines coloured by "i" index
 # Created 20/05/08
 
-        OutName = OutName+"_trails"
+	OutName = OutName+"_trails"
 
 	im  = Image.open(FileName).convert("RGBA")
 	if(len(Axis) != 1):
@@ -102,10 +102,10 @@ def PlotBinaryTrails_1 ( FileName,OutName,Coords,Colours,Axis,AxisAngle,\
 	pasteY = (imN.size[1]/2) - (im.size[1]/2)
 	imN.paste(im,(pasteX,pasteY))
 
-        draw = ImageDraw.Draw(imN)
+	draw = ImageDraw.Draw(imN)
 
 	i = 0
-        while i < len(Coords):
+	while i < len(Coords):
 		#Vectors = [Coords[i][-1][3]-Coords[i][0][3],\
 		#	   Coords[i][-1][4]-Coords[i][0][4]]
 		#Angle   = PS_Maths.CalculateVectorAngle(Vectors)
@@ -130,14 +130,14 @@ def PlotBinaryTrails_1 ( FileName,OutName,Coords,Colours,Axis,AxisAngle,\
 		#	Col = (255,255,0,255)
 
 		draw.ellipse((Coords[i][0][4]-1,Coords[i][0][5]-1,\
-                               Coords[i][0][4]+1,Coords[i][0][5]+1),\
-                               fill=(0,255,0,255) )
-                draw.ellipse((Coords[i][-1][4]-1,Coords[i][-1][5]-1,\
-                               Coords[i][-1][4]+1,Coords[i][-1][5]+1),\
-                               fill=(255,0,0,255) )
+                      Coords[i][0][4]+1,Coords[i][0][5]+1),\
+                      fill=(0,255,0,255) )
+		draw.ellipse((Coords[i][-1][4]-1,Coords[i][-1][5]-1,\
+                      Coords[i][-1][4]+1,Coords[i][-1][5]+1),\
+                      fill=(255,0,0,255) )
 		draw.line((Coords[i][0][4],Coords[i][0][5],\
-                            Coords[i][-1][4],Coords[i][-1][5]),\
-                            fill=Colours[i]  )
+                      Coords[i][-1][4],Coords[i][-1][5]),\
+                      fill=Colours[i]  )
 		#draw.line((Coords[i][0][4],Coords[i][0][5],\
                 #            Coords[i][-1][4],Coords[i][-1][5]),fill=Col  )
 		i += 1
@@ -152,19 +152,19 @@ def PlotBinaryTrails_1 ( FileName,OutName,Coords,Colours,Axis,AxisAngle,\
 
 	if(PlotLines):
 		i = 1
-	        while i < Factor:
-        	        draw.line((0,(Y/Factor)*i,imN.size[1],(Y/Factor)*i),\
-                	                fill=(0,0,0,55))
-	                draw.line(((X/Factor)*i,0,(X/Factor)*i,imN.size[0]),\
-        	                        fill=(0,0,0,55))
+		while i < Factor:
+			draw.line((0,(Y/Factor)*i,imN.size[1],(Y/Factor)*i),\
+                      fill=(0,0,0,55))
+			draw.line(((X/Factor)*i,0,(X/Factor)*i,imN.size[0]),\
+                      fill=(0,0,0,55))
 
-                	i += 1
+			i += 1
 
 	comp = imN
-        comp.save(OutName+".png","PNG")
-        comp.save(OutName+".tif","TIFF")
+	comp.save(OutName+".png","PNG")
+	comp.save(OutName+".tif","TIFF")
 
-        return OutName
+	return OutName
 
 #------------------------------------------------------------------------------
 def PlotSVGTrails_1 ( OutName,O_Name,Coords,Colours,Axis,Factor,FinalIMSize,Polygon,PolygonColour):
@@ -172,21 +172,20 @@ def PlotSVGTrails_1 ( OutName,O_Name,Coords,Colours,Axis,Factor,FinalIMSize,Poly
 # Red end points and green start points. Trail lines coloured by "i" index
 # Created 19/05/08
 
-        OutName = OutName+"_trails"
-        scene = Scene(OutName,FinalIMSize,FinalIMSize)
-
+	OutName = OutName+"_trails"
+	scene = Scene(OutName,FinalIMSize,FinalIMSize)
 	scene.add( SVGImage(FinalIMSize,FinalIMSize,O_Name+"_"+\
-                            str(int(Factor*Factor))+"_original.png") )
+                        str(int(Factor*Factor))+"_original.png") )
 
 	PolygonColour = PS_Outputs.ColourConvert( PolygonColour ) 
 
 	if(len(Axis) != 1):
-        	i = 1
+		i = 1
 	else:
 		i = 0
 
 	i = 0
-        while i < len(Coords):
+	while i < len(Coords):
 		j = 0
 		while j < len(Coords[i]):
 			RGB = PS_Outputs.ColourConvert(Colours[j])
@@ -199,7 +198,7 @@ def PlotSVGTrails_1 ( OutName,O_Name,Coords,Colours,Axis,Factor,FinalIMSize,Poly
                                        (Coords[i][j][-1][4],Coords[i][j][-1][5]),\
                                        (RGB[0],RGB[1],RGB[2]),1,1))
 			j += 1
-                i += 1
+		i += 1
 
 	if(len(Axis) != 1):
 		scene.add(Line((Axis[0],Axis[1]),(Axis[2],Axis[3]),(0,0,0),1,1))
@@ -207,20 +206,18 @@ def PlotSVGTrails_1 ( OutName,O_Name,Coords,Colours,Axis,Factor,FinalIMSize,Poly
 		scene.add(Circle((Axis[2],Axis[3]),1,0,1,(255,0,0),0.5))
 
 	#Draw on the user define polygon
-        polypoints = ""
-        if( len(Polygon) > 2):
-                i = 0
-                while i < len(Polygon):
-                        polypoints += str(Polygon[i][0])+","+\
-                                      str(Polygon[i][1])+" "
-                        i += 1
+	polypoints = ""
+	if( len(Polygon) > 2):
+		i = 0
+		while i < len(Polygon):
+			polypoints += str(Polygon[i][0])+","+str(Polygon[i][1])+" "
+			i += 1
         # Toggle off region drawing!
-                scene.add( PolygonShape((polypoints),(255,255,255),\
-                                        0,PolygonColour,1,3) )
+		scene.add( PolygonShape((polypoints),(255,255,255),0,PolygonColour,1,3) )
 
-        scene.write_svg()
+	scene.write_svg()
 
-        return OutName
+	return OutName
 
 #------------------------------------------------------------------------------
 def PlotSVGTrails_AngColour ( OutName,O_Name,Coords,Colours,Axis,Factor,\
@@ -1292,6 +1289,86 @@ def PlotCompareRoseDiagram ( Runs,FinalIMSize,CoordsSet,Sheet,DirGraphs ):
 
         return ImageName
 
+
+#------------------------------------------------------------------------------
+def PlotExperimentalDesign( Peturbations, TotalFrames ):
+
+	PlotName = "Dave"
+
+	print Peturbations[5]
+	print TotalFrames
+
+	i = 0
+	FramesPre    = []
+	FramesSta    = []
+	FramesPos    = []
+	MagnitudePre = []
+	MagnitudeSta = []
+	MagnitudePos = []
+	
+	FramesLabels    = []
+	MagnitudeLabels = []	
+
+	while i < len(Peturbations):
+		if((Peturbations[i][6] == "PreStartle")  and (int(Peturbations[i][5]) <= 10)):
+			FramesPre.append( Peturbations[i][2] )
+			MagnitudePre.append( 1 )
+		if((Peturbations[i][6] == "Startle")     and (int(Peturbations[i][5]) <= 10)):
+			FramesSta.append( Peturbations[i][2] )
+			MagnitudeSta.append( 1 )
+		if((Peturbations[i][6] == "PostStartle") and (int(Peturbations[i][5]) <= 10)):
+			FramesPos.append( Peturbations[i][2] )
+			MagnitudePos.append( 1 )
+		if((Peturbations[i][6] == "PreStartle")  and (int(Peturbations[i][5]) == 1)):
+			FramesLabels.append( Peturbations[i][2] )
+			MagnitudeLabels.append( 1 )
+		i += 1
+
+	print int(FramesPre[0]), " to ", int(FramesPos[9])
+
+	figure()
+	stem(FramesPre,MagnitudePre, linefmt='g-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesSta,MagnitudeSta, linefmt='y-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesPos,MagnitudePos, linefmt='r-', markerfmt='', linewidth=0.1, BaseValue=0)
+	xlim(0,1.1*int(TotalFrames))
+	ylim(0,1.5)
+	xlabel('Frames')
+	ylabel('peturbations')
+	title_text = 'Frames Vs Peturbations '
+	title(title_text)
+	grid(True)
+	savefig('GraphOutput/ExperimentalDesign.png')
+
+	figure()
+	stem(FramesPre,MagnitudePre, linefmt='g-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesSta,MagnitudeSta, linefmt='y-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesPos,MagnitudePos, linefmt='r-', markerfmt='', linewidth=0.1, BaseValue=0)
+	xlim(int(FramesPre[0]), int(FramesPos[9]))
+	ylim(0,1.5)
+	xticks(FramesLabels, color='black', rotation=-45, fontsize=8)
+	xlabel('Frames')
+	ylabel('peturbations')
+	title_text = 'Frames Vs Peturbations '
+	title(title_text)
+	grid(True)
+	savefig('GraphOutput/ExperimentalDesignZoom.png')
+
+	figure(figsize=(15/2.54,10/2.54))
+	stem(FramesPre,MagnitudePre, linefmt='g-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesSta,MagnitudeSta, linefmt='y-', markerfmt='', linewidth=0.1, BaseValue=0)
+	stem(FramesPos,MagnitudePos, linefmt='r-', markerfmt='', linewidth=0.1, BaseValue=0)
+	xlim(int(FramesPre[0]), int(FramesPos[9]))
+	ylim(0,1.5)
+	xticks([int(FramesPre[0]), int(FramesPos[9])], [int(FramesPre[0]), int(FramesPos[9])], fontsize=8, color='black', rotation=-45)
+	xlabel('Frames')
+	ylabel('peturbations')
+	title_text = 'Frames Vs Peturbations '
+	title(title_text)
+	grid(True)
+	savefig('GraphOutput/ExperimentalDesignFirst.png')
+
+	return PlotName
+
 #------------------------------------------------------------------------------
 def PlotDirectionTable ( TrailVectors ):
 
@@ -2070,6 +2147,50 @@ def PlotDistanceVsTimeCummulative(Coords,Sheet,Num,Name,TimeUnits,DistanceUnits,
 	savefig((DirGraphs+"/"+GraphName+'.svg'),dpi=350)
 	del(Coords)
 	return GraphName
+
+#------------------------------------------------------------------------------
+def PlotDistanceVsTimeCummulativeBehavioural(Coords,Sheet,Num,Name,TimeUnits,\
+											 DistanceUnits, MaxDist, TimeFactor,\
+                                             DirGraphs, makePlot):
+
+        Distance = 0
+        Dist     = []
+        Time     = []
+        j        = 1
+        Timey    = 0
+        while j < len(Coords):
+                Distance += abs(PS_Maths.Calculate2PointsDistance(\
+                                        Coords[j-1][4],Coords[j-1][5],\
+                                        Coords[j][4],Coords[j][5]))
+                Timey += Coords[j][2]
+                Dist.append(Distance/TimeFactor)
+                Time.append(Timey)
+
+                if(j < 5):
+                    print j, " --- ", str(Distance), ",", str(Timey)
+                j += 1
+
+        if(makePlot):
+            print("Making DistanceVsTimeCummulative plot")
+            figure()
+            params = { 'axes.labelsize':2,'text.fontsize':2,\
+                       'xtick.labelsize': 8,'ytick.labelsize': 2}
+
+            plot(Time,Dist,'r-',Time,Dist,'b+')
+
+            xlabel(("Time in ("+str(TimeUnits)+")") )
+            ylabel(("Cummulative Distance ("+str(DistanceUnits)+")"))
+            title("Cummulative Distance Vs Time for Arena "+str(Sheet+1)+" (Frames="+str(j)+")")
+
+            GraphName = 'DistanceVsTime_'+Name+'_arena_'+str(Sheet+1)
+            savefig((DirGraphs+"/"+GraphName+'.png'),dpi=75)
+            savefig((DirGraphs+"/"+GraphName+'.svg'),dpi=350)
+            close()
+        else:
+            GraphName = 'none'
+
+        del(Coords)
+        return(GraphName,Distance)
 
 #------------------------------------------------------------------------------
 def PlotDeltaYVsTime (Coords,Name,TimeUnits,DistanceUnits):

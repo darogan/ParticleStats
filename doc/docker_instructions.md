@@ -4,15 +4,13 @@
 
 # Set up and build the docker instance
 
-docker pull dockerfile/ubuntu
+git clone https://github.com/darogan/ParticleStats
 
+cd ParticleStats
 
 docker build -t particlestats_docker .
 
-
-docker run --name particlestats_docker -i -t ubuntu
-
-
+docker run -it particlestats_docker
 
 
 # View the available images on the system

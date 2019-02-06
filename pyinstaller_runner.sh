@@ -42,15 +42,15 @@
 #
 
 
-${OSBUILD}="Debian-GNU-Linux-8-jessie"
-#${OSBUILD}="Ubuntu-16.04.3-LTS"
+OSBUILD="Debian-GNU-Linux-8-jessie"
+#OSBUILD="Ubuntu-16.04.3-LTS"
 
 
 cd scripts/
 
-pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Behavioral_${OSBUILD}     --onefile ParticleStats_Behavioral.py
-pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Compare_${OSBUILD}        --onefile ParticleStats_Compare.py
-pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Directionality_${OSBUILD} --onefile ParticleStats_Directionality.py
-pyinstaller --additional-hooks-dir=../ParticleStats/ --name ParticleStats_Kymographs_${OSBUILD}     --onefile ParticleStats_Kymographs.py
-pyinstaller --additional-hooks-dir=../ParticleStats/ --name TrackAlign_${OSBUILD}                   --onefile TrackAlign.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name "ParticleStats_Behavioral_${OSBUILD}"     --onefile ParticleStats_Behavioral.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name "ParticleStats_Compare_${OSBUILD}"        --onefile ParticleStats_Compare.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name "ParticleStats_Directionality_${OSBUILD}" --onefile ParticleStats_Directionality.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name "ParticleStats_Kymographs_${OSBUILD}"     --onefile ParticleStats_Kymographs.py
+pyinstaller --additional-hooks-dir=../ParticleStats/ --name "TrackAlign_${OSBUILD}"                   --onefile TrackAlign.py
 

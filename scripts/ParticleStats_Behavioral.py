@@ -76,9 +76,6 @@ parser.add_option("-d", "--debug",
 
 
 
-print "pixelRatio=", options.PixelRatio
-
-
 #ERROR CHECK
 if( os.path.exists(str(options.VibtestFile)) != 1):
         print "ERROR: VibTest file does not exists - check correct path and name"
@@ -89,14 +86,16 @@ if( os.path.exists(str(options.VibtestFile)) != 1):
 ###############################################################################
 # LOAD IN THE REQUIRED MODULES ONLY AFTER MAIN USER OPTIONS CHECKED
 ###############################################################################
-print "\nLoading External Modules..."
+print "\nChecking Python Version... ", sys.version_info[0], ".", sys.version_info[1]
+
+print "Loading External Modules..."
 import ParticleStats.ParticleStats_Inputs  as PS_Inputs
 import ParticleStats.ParticleStats_Outputs as PS_Outputs
 import ParticleStats.ParticleStats_Maths   as PS_Maths
 import ParticleStats.ParticleStats_Plots   as PS_Plots
 import numpy as na
 import re
-print "Loading complete\n\n"
+print "Loading complete\n"
 
 #Print the welcome logo plus data and run mode
 FontSize_Titles = 2
@@ -132,20 +131,22 @@ FDs = []
 
 (InputDirName1, InputFileName1) = os.path.split(options.VibtestFile)
 
-Coords1,Corrections1,Axes1 = PS_Inputs.ReadVibtest_SingleFile(options.VibtestFile, 250, 24)
+Coords1,Corrections1,Axes1,Perturbations1,TotalFrames1 = PS_Inputs.ReadVibtest_SingleFile(options.VibtestFile, 250, 24)
 
 FDs.append({'InputDirName':InputDirName1,'InputFileName':InputFileName1,\
-			'Coords':Coords1, 'Corrections':Corrections1, 'Axes':Axes1 })
+			'Coords':Coords1, 'Corrections':Corrections1, 'Axes':Axes1,\
+			'Perturbations':Perturbations1, 'TotalFrames':TotalFrames1 })
 
 del(InputDirName1,InputFileName1)
 del(Coords1,Corrections1,Axes1)
+del(Perturbations1,TotalFrames1)
 
 PS_Outputs.Print_Parameters( FDs[0]['InputFileName'],FDs[0]['Coords'], \
 							 FDs[0]['InputFileName'],FDs[0]['Coords'], \
                  			 options.OutputType,FontSize_Text )
 
 Colours   = ["red","blue","green","purple","orange","yellow",\
-         "silver","cyan","brown","magenta","silver","gold"]
+             "silver","cyan","brown","magenta","silver","gold"]
 Colours   = Colours * 100
 Separator = "" + ("+"*90)
 
@@ -160,7 +161,6 @@ print PS_Inputs.Colourer(("### Creating Results Directory "+str(options.OutputDi
                           options.OutputType,"bold",FontSize_Titles)
 if not os.path.exists(options.OutputDir):
 	os.makedirs(options.OutputDir)
-
 
 
 RealAllRuns  = []
@@ -184,10 +184,11 @@ while coordset < len(FDs):
 	FileOut               = "" 
 	RunCounter            = 0; 
 
-	print len(FDs[coordset]['Coords'])
-	print len(FDs[coordset]['Coords'][0])
-	print len(FDs[coordset]['Coords'][0][0])
-
+	# Lets look at the experimental design
+	print "+ There are ", len(FDs[coordset]['Perturbations']), " peturbation events in the experiment"
+	ExptPlotName = PS_Plots.PlotExperimentalDesign(FDs[coordset]['Perturbations'], FDs[coordset]['TotalFrames'])
+	print "ExptPlotName = ", ExptPlotName
+	sys.exit()
 
 	i = 0
 	while i < len(FDs[coordset]['Coords']): #cycle through sheets
@@ -219,22 +220,24 @@ while coordset < len(FDs):
 			TrailImage = PS_Inputs.DrawTrailsOnImageFile(FirstImage,i,\
                                      FDs[coordset]['InputFileName'],Colours[i],\
                                      FDs[coordset]['Coords'][i],\
-                                     options.PixelRatio,Regression,options.OutputDir)
+                                     options.PixelRatio,Regression,options.OutputDir,0.1)
 
-#		j = 0
-#		while j < len(FDs[coordset]['Coords'][i]): #cycle through       
+		j = 0
+		while j < len(FDs[coordset]['Coords'][i]): #cycle through       
+                
+			if(j < 5):    
+				print "\t", j, "\t",  FDs[coordset]['Coords'][i][j]
 
-#			print FDs[coordset]['Coords'][i][j]
+			j += 1
 
-#			print PS_Inputs.Colourer(Separator,"grey",options.OutputType,"",FontSize_Text)
-#
-#
-#			# Perform Cummulative Distance plotting 
-#			if(options.graphs):
-#				DistanceCummulativePlot = PS_Plots.PlotDistanceVsTimeCummulative(\
-#											FDs[coordset]['Coords'][i][j],i,j,\
-#											("Coords"+str(coordset+1)),"msecs","nm",DirGraphs)
-#			j += 1
+		# Perform Cummulative Distance plotting 
+		#options.graphs = 0
+		DistanceCummulativePlot,Distance = PS_Plots.PlotDistanceVsTimeCummulativeBehavioural(\
+                                                        FDs[coordset]['Coords'][i],i,j,\
+                                                        ("Coords"+str(coordset+1)),"time-units","dist-units",\
+                                                        500000, 1000,
+														DirGraphs, options.graphs)
+		print "TotalDistance, "+ImageFileSearchPath+", "+str(i+1)+", "+str(Distance)
 		i += 1
 
 	coordset += 1

@@ -37,6 +37,7 @@
 ###############################################################################
 
 import ParticleStats_Maths as PS_Maths
+import math
 import numpy as na
 import os,sys
 from PIL import Image, ImageDraw, ImageColor
@@ -130,14 +131,14 @@ def DrawExcelCoords (FileNames,Coords,Stem,Colours):
 
 #------------------------------------------------------------------------------
 def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
-                          Regression,DirGraphs):
+                          Regression,DirGraphs,errorLimit):
 
 #	im = Image.open(FileName).convert('RGBA')
 	im = Image.new('RGBA',(1200, 800))
 	#png_info = im.info
 	print "Scale=", Scale
 	Scale = float(Scale)
-	print(im.info, im.format, im.size, im.mode)
+	#print(im.info, im.format, im.size, im.mode)
 
 #	datas = im.getdata()
 #	newData = []
@@ -163,9 +164,8 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 	if(ParticleNo >= 12 and ParticleNo < 18): y += 215 + 4
 	if(ParticleNo >= 18):                     y += 300 + 4
 
-	diam = (70/2)/Scale
-#	draw.ellipse((x-diam,y-diam,x+diam,y+diam), fill='white', outline ='blue')
-	print "ParticleNo=", ParticleNo, "x=", x, "y=", y,"diam", diam
+	radius = (70/2)/Scale
+	print "ParticleNo=", ParticleNo, "x=", x, "y=", y,"radius", radius
 
 	XCoords = []
 	YCoords = []
@@ -178,30 +178,68 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 
 		i += 1
 
-	x_geomean = PS_Maths.geo_mean( XCoords )
-	y_geomean = PS_Maths.geo_mean( YCoords )
+	x_mean,x_geomean = PS_Maths.geo_mean( XCoords )
+	y_mean, y_geomean = PS_Maths.geo_mean( YCoords )
 
-	print "x_geomean=", x_geomean
-	print "y_geomean=", y_geomean
+	print "x_mean=", x_mean, " x_geomean=", x_geomean
+	print "y_mean=", y_mean, " y_geomean=", y_geomean
 
+	convexhullPolygon   = PS_Maths.ConvexHull_Points(points)
+	convexhullPerimeter = PS_Maths.Polygon_Perimeter(convexhullPolygon)
+	convexhullArea      = PS_Maths.Polygon_Area(convexhullPolygon)
+	convexhullRoundness = PS_Maths.Polygon_Roundness(convexhullArea, convexhullPerimeter)
+
+	idealPerimeter = 2 * math.pi * radius
+	idealArea      = math.pi * radius**2
+
+	errorPerimeter = 1 - ( convexhullPerimeter / idealPerimeter )
+	errorArea      = 1 - ( convexhullArea      / idealArea      )
+	errorRoundness = 1 - convexhullRoundness
 
 	smallestEnclosingCircle = PS_Maths.make_circle(points)
-	print "smallestEnclosingCircle=", smallestEnclosingCircle
 
-	draw.ellipse((smallestEnclosingCircle[0]-diam,
-				  smallestEnclosingCircle[1]-diam,
-                  smallestEnclosingCircle[0]+diam,
-				  smallestEnclosingCircle[1]+diam),
-                  fill=(255,255,255,0), outline ='blue')
 
-	minprint = 25000
-	maxprint = 125000
+	print "smallestEnclosingCircle  = ", smallestEnclosingCircle
+	errorRadius = math.fabs( 1 - ( smallestEnclosingCircle[2] / radius) )
+	print "Circle Radius            = %8.2f [error=%6.2f]" % (smallestEnclosingCircle[2], errorRadius)
+	print "ConvexHull Polygon (len) = %8.2f"               % len(convexhullPolygon)
+	print "ConvexHull Perimeter     = %8.2f [error=%6.2f]" % ( convexhullPerimeter, errorPerimeter )
+	print "ConvexHull Area          = %8.2f [error=%6.2f]" % ( convexhullArea, errorArea )
+	print "ConvexHull Roundness     = %8.2f [error=%6.2f]" % ( convexhullRoundness, errorRoundness )
+
+	if( (errorPerimeter > errorLimit) or (errorArea > errorLimit) or (errorRoundness > errorLimit) ):
+		print "QC_FAIL: ", DirGraphs, " ", ParticleNo+1, " [Pe=%4.2f Ar=%4.2f Ro=%4.2f]"%(errorPerimeter,errorArea,errorRoundness)
+
+	print "centroid %s %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f"%(
+           DirGraphs, ParticleNo+1,
+           x_mean, y_mean, x_geomean, y_geomean,
+           smallestEnclosingCircle[0], smallestEnclosingCircle[1], smallestEnclosingCircle[2])
+
+	# Actual smallest circle
+	draw.ellipse((smallestEnclosingCircle[0]-smallestEnclosingCircle[2],
+                  smallestEnclosingCircle[1]-smallestEnclosingCircle[2],
+                  smallestEnclosingCircle[0]+smallestEnclosingCircle[2],
+                  smallestEnclosingCircle[1]+smallestEnclosingCircle[2]),
+                  fill=None, outline ='purple')
+
+    # Idealised Circle
+	draw.ellipse((smallestEnclosingCircle[0]-radius,
+				  smallestEnclosingCircle[1]-radius,
+                  smallestEnclosingCircle[0]+radius,
+				  smallestEnclosingCircle[1]+radius),
+                  fill=None, outline ='blue')
+
+	polyFlat = list(na.array(convexhullPolygon).flat)
+
+	draw.polygon(polyFlat, fill=None, outline ='red')
+
 	i = 0
 	while i < len(Coords):
 		draw.point( (Coords[i][4]/Scale, Coords[i][5]/Scale),fill=Colour )
-		if(i > minprint and i <= maxprint and ParticleNo == 5 and i % 100 == 0):
-			print ',' . join([ str(Coords[i][1]), str(Coords[i][2]), str(Coords[i][4]), str(Coords[i][5]) ])
+		#	print ',' . join([ str(Coords[i][1]), str(Coords[i][2]), str(Coords[i][4]), str(Coords[i][5]) ])
 		i += 1
+
+	draw.text( (smallestEnclosingCircle[0],smallestEnclosingCircle[1]), "r="+str( "%.3f" % convexhullRoundness ), fill='black')
 
 #	draw.text( (5,0), "Original Image  = "+os.path.basename(FileName), fill='red')
 #	draw.text( (5,10),"Coordinates Set = "+str(CoordsSet), fill='red')
@@ -974,9 +1012,11 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 	(O_Name,O_Ext) = os.path.splitext(O_File)
 	OutName =  '.' . join([O_Name , "xls"])
 
-	ExptData    = []
-	Corrections = []
-	Axes        = []
+	ExptData     = []
+	Corrections  = []
+	Axes         = []
+	Peturbations = []
+	TotalFrames  = 0
 
 	count = 0
 	while (count < NumArenas):
@@ -1013,7 +1053,29 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 					ImagePlane += 1
 				num += 1
 
-		LineNumber += 1
+			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and 
+				  (element[7] == "PreStartle") and (int(element[6]) <= 10) ):	
+				#print "Prestartle,",
+				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
+				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+                                       int(element[5]), int(element[6]), str(element[7]) ]  )
+				
+			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and 
+				  (element[7] == "Startle") and (int(element[6]) <= 10) ):
+				#print "Startle,", 
+				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
+				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+                                       int(element[5]), int(element[6]), str(element[7]) ]  )
+			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and   
+                  (element[7] == "PostStartle") and (int(element[6]) <= 10) ):
+				#print "PostStartle,", 
+				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
+				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+                                       int(element[5]), int(element[6]), str(element[7]) ]  )
+
+			LineNumber += 1
+
+		TotalFrames = ImagePlane
 
 #	for i in range(len(ExptData)):
 #
@@ -1025,7 +1087,7 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 	if len(Corrections) < 1: Corrections = [99,99,99,99]
 	if len(Axes) < 1:    Axes        = [99,99,99,99] #[100,120,100,100] #[99,99,199,99]
 
-	return ExptData, Corrections, Axes
+	return ExptData, Corrections, Axes, Peturbations, TotalFrames
 
 #------------------------------------------------------------------------------
 # FIN
