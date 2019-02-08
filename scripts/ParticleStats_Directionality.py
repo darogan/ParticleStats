@@ -378,7 +378,7 @@ while i < len(Coords):
 	j = 0
 	while j < len(Coords[i]):
 
-		print Coords[i][j][0][4], ",", Coords[i][j][0][5], ",", Coords[i][j][-1][4], ",", Coords[i][j][-1][5] 
+		#print Coords[i][j][0][4], ",", Coords[i][j][0][5], ",", Coords[i][j][-1][4], ",", Coords[i][j][-1][5] 
 
 		Trails.append( [Coords[i][j][0][4],Coords[i][j][0][5], Coords[i][j][-1][4],Coords[i][j][-1][5] ] )
 		TrailVectors.append ( [Coords[i][j][-1][4]-Coords[i][j][0][4],\
@@ -850,23 +850,23 @@ if(options.OutputType == "html"):
 
 	print "<FONT FACE=sans,arial SIZE=1><B>Windmap Image (opacity is number of trails)</B><BR>"
 	print "<A HREF='"  + URL + str(FileName) +\
-	      "_windmap_num.png' TARGET=_blank>" +\
+	      "_windmap_num_angle.png' TARGET=_blank>" +\
               "<IMG SRC='" + URL + str(FileName) +\
-	      "_windmap_num.png' WIDTH=175 BORDER=0></A><BR>" 
+	      "_windmap_num_angle.png' WIDTH=175 BORDER=0></A><BR>" 
 	print "<A HREF='" + URL + str(FileName) +\
-              "_windmap_num.png' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[PNG]</A>"
+              "_windmap_num_angle.png' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[PNG]</A>"
         print "<A HREF='" + URL + str(FileName) +\
-              "_windmap_num.svg' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[SVG]</A><P>"
+              "_windmap_num_angle.svg' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[SVG]</A><P>"
 
         print "<FONT FACE=sans,arial SIZE=1><B>Windmap Image (opacity is magnitude of trails)</B><BR>"
         print "<A HREF='"  + URL + str(FileName) +\
-              "_windmap_mag.png' TARGET=_blank>" +\
+              "_windmap_mag_angle.png' TARGET=_blank>" +\
               "<IMG SRC='" + URL + str(FileName) +\
-              "_windmap_mag.png' WIDTH=175 BORDER=0></A><BR>"
+              "_windmap_mag_angle.png' WIDTH=175 BORDER=0></A><BR>"
         print "<A HREF='" + URL + str(FileName) +\
-              "_windmap_mag.png' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[PNG]</A>"
+              "_windmap_mag_angle.png' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[PNG]</A>"
         print "<A HREF='" + URL + str(FileName) +\
-              "_windmap_mag.svg' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[SVG]</A><P>"
+              "_windmap_mag_angle.svg' STYLE='TEXT-DECORATION: NONE' TARGET=_blank>[SVG]</A><P>"
 
 	print "<FONT FACE=sans,arial SIZE=1><B>Rose Diagrams</B><BR>"
 

@@ -47,10 +47,10 @@ use File::Spec;
 my $uploaddir;
 my $webspace;
 
-if($ENV{'HTTP_HOST'} =~ /particlestats.trophoblast.cam.ac.uk/)
+if($ENV{'HTTP_HOST'} =~ m/ctr-web.pdn.cam.ac.uk/)
   {
-    $uploaddir = "/var/www/particlestats/docroot/ParticleStats2.0/PS_Out/";
-    $webspace  = "http://particlestats.trophoblast.cam.ac.uk";
+    $uploaddir = "/storage/www/ParticleStats2.0/PS_Out/";
+    $webspace  = "http://ctr-web.pdn.cam.ac.uk/ParticleStats2.0";
   }
 else
   {
@@ -179,14 +179,14 @@ sub Process
 
       if($q->param('OPT_Example') =~ m/on/)
         {
-          $Command = "./ParticleStats_Compare/ParticleStats_Compare -o html $ExtraOptions " .
+          $Command = "ParticleStats_Compare.py -o html $ExtraOptions " .
                      "-a $uploaddir/CompareExample_control.xls " .
                      "-b $uploaddir/CompareExample_variant.xls " .
                      "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
         }
       else
         {
-          $Command = "./ParticleStats_Compare.py -o html $ExtraOptions " . 
+          $Command = "ParticleStats_Compare.py -o html $ExtraOptions " . 
                      "-a $upload_path/$ExcelFile1 -b $upload_path/$ExcelFile2 " . 
                      "--outdir=PS_Out/$Directory/ --outhtml=$webspace/";
         }
@@ -215,15 +215,15 @@ sub Process
           Uploader ($q->upload("tiff1"), $TiffFile1, $upload_path);
         }
 
-      if($q->param('OPT_AxisRotate') =~ m/on/) { $ExtraOptions .= " -a "; }
-      if($q->param('OPT_ShowGrid') =~ m/on/) { $ExtraOptions .= " -g "; }
+      if($q->param('OPT_AxisRotate') =~ m/on/)     { $ExtraOptions .= " -a "; }
+      if($q->param('OPT_ShowGrid') =~ m/on/)       { $ExtraOptions .= " -g "; }
       if($q->param('OPT_ShowRectangles') =~ m/on/) { $ExtraOptions .= " -r "; }
-      if($q->param('OPT_ShowArrows') =~ m/on/) { $ExtraOptions .= " -c "; }
-      if($q->param('OPT_ScaleRose') =~ m/on/) { $ExtraOptions .= " --scalerose "; }
+      if($q->param('OPT_ShowArrows') =~ m/on/)     { $ExtraOptions .= " -c "; }
+      if($q->param('OPT_ScaleRose') =~ m/on/)      { $ExtraOptions .= " --scalerose "; }
 
       if($q->param('OPT_Example') =~ m/on/)
         {
-          $Command = "python ParticleStats_Directionality.py " . 
+          $Command = "ParticleStats_Directionality.py " . 
                      "-x $uploaddir/DirectionalityExample.xls " .
                      "-i $uploaddir/DirectionalityExample.tif -s " . $q->param('OPT_Squares') . 
                      " --ArrowColour " . $q->param('OPT_ArrowColour') .
@@ -234,7 +234,7 @@ sub Process
         }
       else
         {
-          $Command = "python ParticleStats_Directionality.py " . 
+          $Command = "ParticleStats_Directionality.py " . 
                      "-x $upload_path/$ExcelFile1 " . 
                      "-i $upload_path/$TiffFile1 -s " . $q->param('OPT_Squares') . 
                      " --ArrowColour=" . $q->param('OPT_ArrowColour') .
@@ -272,8 +272,8 @@ sub Process
 
       if($q->param('OPT_Example') =~ m/on/)
         {
-          $Command = "python ParticleStats_Kymographs.py -x $uploaddir/KymographExample.xls " .
-                     "--tiffdir=$upload_path/ " .
+          $Command = "ParticleStats_Kymographs.py -x $uploaddir/KymographExample.xls " .
+                     "--tiffdir=$uploaddir/KymographExample_dir " .
                      "-n " . $q->param('OPT_Noise') . " " .
                      "-t " . $q->param('OPT_Threshold') . " " .
                      "--speed_start=" . $q->param('OPT_TimeStart') . " " .
@@ -282,7 +282,7 @@ sub Process
         }
       else
         {
-          $Command = "python ParticleStats_Kymographs.py -x $upload_path/$ExcelFile1 " . 
+          $Command = "ParticleStats_Kymographs.py -x $upload_path/$ExcelFile1 " . 
                      "--tiffdir=$upload_path/ " .
                      "-n " . $q->param('OPT_Noise') . " " . 
                      "-t " . $q->param('OPT_Threshold') . " " .
@@ -319,8 +319,8 @@ sub Process
             "<B>ParticleStats results link and command</B></TD></TR>" .
             "<TR><TD><FONT FACE='sans,arial' SIZE=2>" .
             "<B>Static link available for 1 week</B>:<BR>" .
-            "<A HREF='$webspace/ParticleStats2.0/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
-            "$webspace/ParticleStats2.0/PS_Out/$Directory</A>" .
+            "<A HREF='$webspace/PS_Out/$Directory' STYLE='TEXT-DECORATION: NONE'>" .
+            "$webspace/PS_Out/$Directory</A>" .
             "<P><B>Command Line Given</B>:<BR>" .
             "<FONT FACE=courier SIZE=1>$Command</TD></TR>" .
             "<TR><TD VALIGN=top COLSPAN=1>" . $Runner . "</TD></TR></TABLE>";
@@ -666,7 +666,7 @@ sub Start_Page
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>1. <FONT COLOR='grey'>ParticleStats::</FONT>Compare</TD>
     <TD width=35 ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD VALIGN=MIDDLE><A HREF='$cgi_url?Phase=Compare&Step=Start'>
-    <IMG SRC='$webspace/Images/compare_logo_100px.png' BORDER=0></A></TD>
+    <IMG SRC='Images/compare_logo_100px.png' BORDER=0></A></TD>
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Compare&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Compare Runs & Pauses from Tracked data</A></TD>
@@ -676,7 +676,7 @@ sub Start_Page
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>2. <FONT COLOR='grey'>ParticleStats::</FONT>Directionality</TD>
     <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD><A HREF='$cgi_url?Phase=Directionality&Step=Start'>
-    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></A></TD>
+    <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></A></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Directionality&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Directionality from Tracked data</TD>
@@ -686,7 +686,7 @@ sub Start_Page
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>3. <FONT COLOR='grey'>ParticleStats::</FONT>Kymographs</TD>
     <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>v1.0</TD>
     <TD><A HREF='$cgi_url?Phase=Kymographs&Step=Start'>
-    <IMG SRC='$webspace/Images/kymograph_logo_100px.png' BORDER=0></TD>
+    <IMG SRC='Images/kymograph_logo_100px.png' BORDER=0></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Kymographs&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Data from Kymographs images</TD>
@@ -696,7 +696,7 @@ sub Start_Page
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>4. <FONT COLOR='grey'>ParticleStats::</FONT>Behavioural</TD>
     <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR='red'>v2.0</TD>
     <TD><A HREF='$cgi_url?Phase=Behavioural&Step=Start'>
-    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></TD>
+    <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=Behavioural&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Analyse Data from Behavioural assays</TD>
@@ -706,7 +706,7 @@ sub Start_Page
     <TD VALIGN=middle><FONT FACE='sans,arial' SIZE=4>5. <FONT COLOR='grey'>ParticleStats::</FONT>TrackAlign</TD>
     <TD ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR='red'>v2.0</TD>
     <TD><A HREF='$cgi_url?Phase=TrackAlign&Step=Start'>
-    <IMG SRC='$webspace/Images/directionality_logo_100px.png' BORDER=0></TD>
+    <IMG SRC='Images/directionality_logo_100px.png' BORDER=0></TD>
     <TD><FONT FACE='sans,arial' SIZE=2>
     <A HREF='$cgi_url?Phase=TrackAlign&Step=Start' STYLE='TEXT-DECORATION: NONE'>
     Compare tracking data</TD>
@@ -752,13 +752,14 @@ $header
     <B>A suite of tools for the analysis, comparison, and optimization of tracking data</B>
     </TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>
     <B>By Russell S. Hamilton </B><BR>
+    <A HREF='http://www.gen.cam.ac.uk' STYLE='TEXT-DECORATION: NONE'>Department of Genetics, University of Cambridge</A><BR>
     <A HREF='http://www.trophoblast.cam.ac.uk' STYLE='TEXT-DECORATION: NONE'>Centre for Trophoblast Research, University of Cambridge</A><P>
     Contact:<BR>&nbsp &nbsp rsh46 -at- cam.ac.uk<BR>
     &nbsp &nbsp <A HREF='http://www.particlestats.com'
     STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>
     </TD></TR>
     <TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>
-    <A HREF='$webspace/cgi-bin/ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>&nbsp<A HREF='https://github.com/darogan/ParticleStats' STYLE='TEXT-DECORATION: NONE'>[GitHub]</A>&nbsp<A HREF='http://www.particlestats.com' STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>&nbsp<A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>
+    <A HREF='$webspace/ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>&nbsp<A HREF='https://github.com/darogan/ParticleStats' STYLE='TEXT-DECORATION: NONE'>[GitHub]</A>&nbsp<A HREF='http://www.particlestats.com' STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>&nbsp<A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>
     </TD></TR>
   </TABLE>
 

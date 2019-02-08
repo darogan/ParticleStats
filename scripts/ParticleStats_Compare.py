@@ -328,8 +328,8 @@ while coordset < len(FDs):
 
                                 print " Regression=[X=%6.3f,"%Regression['X'],\
                                       "Intercept=%6.0f,"%Regression['Intercept'],\
-                                      "R2=%6.3f,"%Regression['R2'],\
-                                      "aR2=%6.3f"%Regression['aR2'],"]"
+                                      "R2=%6.3f,"%Regression['R2'],"]"
+                                      #"aR2=%6.3f"%Regression['aR2'],"]"
 			else:
 				Regression = ""
 

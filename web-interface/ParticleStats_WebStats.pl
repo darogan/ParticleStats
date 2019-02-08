@@ -43,44 +43,39 @@ use warnings;
 
 my($uploaddir, $webspace, $cgidir, $date, $q,
    $url, @CounterData, $i, $Webpage, $Output,@TempCounterData, 
-   @IPAddress, %IPHash, $cnt, %Country, $GeoLoc, $element,);
+   %ProgramHash, @IPAddress, %IPHash, $cnt, %Country, %City, $element);
 
 ###############################################################################
 # Change the values in this section to configure the script for your server
 
-if($ENV{'HTTP_HOST'} =~ /idcws.bioch.ox.ac.uk/)
+if($ENV{'HTTP_HOST'} =~ /ctr-web.pdn.cam.ac.uk/)
   {
-    $uploaddir = "/home/rhamilto/public_html/ParticleStats2/PS_Out/";
-    $webspace  = "http://idcws.bioch.ox.ac.uk/~rhamilto/ParticleStats2";
-    $cgidir    = "http://idcws.bioch.ox.ac.uk/cgi-particle2";
-  }
-elsif($ENV{'HTTP_HOST'} =~ /simulans.bioch.ox.ac.uk/)
-  {
-    $uploaddir = "/home/particlestats/public_html/PS_Out/";
-    $webspace  = "http://simulans.bioch.ox.ac.uk/~particlestats/";
-    $cgidir    = "http://simulans.bioch.ox.ac.uk/cgi-particle";
+    $uploaddir = "/storage/www/ParticleStats2.0/PS_Out/";
+    $webspace  = "http://ctr-web.pdn.cam.ac.uk/ParticleStats2.0";
+    $cgidir    = "http://ctr-web.pdn.cam.ac.uk/ParticleStats2.0";
   }
 else
   {
-    $uploaddir = "/home/particlestats/public_html/PS_Out/";
-    $webspace  = "http://idcn1.bioch.ox.ac.uk/~particlestats/";
-    $cgidir    = "http://idcn1.bioch.ox.ac.uk/cgi-particle";
+#    exit;
+    $uploaddir = "/storage/www/ParticleStats2.0/PS_Out/";
+    $webspace  = "http://ctr-web.pdn.cam.ac.uk/ParticleStats2.0";
+    $cgidir    = "http://ctr-web.pdn.cam.ac.uk/ParticleStats2.0";  
   }
 
 $q = new CGI;
 
-use LWP::Simple;
-use XML::Simple;
+use Net::IPInfoDB;
+use GD::Graph::pie;
+use MIME::Base64;
 
-my $browser = LWP::UserAgent->new;
-
-$date = `date +%F_%H%M`;
+$date = `date +%F_%H:%M`;
 chomp($date);
 
 open(COUNTER,"$uploaddir/Counter.text");
 @CounterData = <COUNTER>;
 close COUNTER;
-$cnt = 1;
+
+#$cnt = 1;
 
 for($i=0; $i<=$#CounterData; $i++)
    {
@@ -88,19 +83,49 @@ for($i=0; $i<=$#CounterData; $i++)
 
      if ($IPHash{$TempCounterData[2]} < 1 )
        {
-         $IPAddress[$cnt] = $TempCounterData[2];
-         $url = "http://ipinfodb.com/ip_query.php?ip=$TempCounterData[2]";
-         my $response = $browser->get( $url );
-         my $ref = XMLin( $response->content );
-         $Country{ $ref->{CountryName} }++;
-         $GeoLoc .= "&markers=color:red|" . $ref->{Latitude} . "," . $ref->{Longitude}; 
-         $cnt++
+         my $APIHash = "1ab51f9a73282cc49ba55a2c14ea917f9d23dee1ee71daed0fbbfa2136ea567d";
+         my $g = Net::IPInfoDB->new;
+         $g->key($APIHash);
+         my $city_level = $g->get_city($TempCounterData[2]);
+
+         my $IP_city      = $city_level->city_name;
+         my $IP_country   = $city_level->country_name;
+         my $IP_latitude  = $city_level->latitude;
+         my $IP_longitude = $city_level->longitude;
+         if( length($IP_city)    < 1 ) { $IP_city    = "unknown"; }
+         if( length($IP_country) < 1 ) { $IP_country = "unknown"; }
+
+         $City{ $IP_city }++;
+         $Country{ $IP_country }++;
+
+         sleep(2);
+         #$cnt++
        }
      $IPHash{$TempCounterData[2]}++;
+     $ProgramHash{$TempCounterData[0]}++;
    }
 
+
+delete $ProgramHash{'Start'};
+
+my @prog_names  = keys %ProgramHash;
+my @prog_counts = values %ProgramHash;
+
+my @data = ( [@prog_names], [@prog_counts] );
+
+my $mygraph = GD::Graph::pie->new(300, 300);
+$mygraph->set(
+    title       => 'ParticleStats ::: Module Usage',
+    '3d'          => 0,
+) or warn $mygraph->error;
+
+$mygraph->set_value_font(GD::gdMediumBoldFont);
+my $myimage = $mygraph->plot(\@data) or die $mygraph->error;
+
 $Output .= "<P><TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-           "<TR><TD><FONT FACE=sans,arial SIZE=4><B>Visitors using ParticleStats:</B><P>";
+           "<TR><TD><FONT FACE=sans,arial SIZE=4><B>Visitors using ParticleStats:</B>" .
+           "</TD><TD></TD></TR><TR><TD>";
+
 my $cnt_all  = 0;
 my $cnt_uniq = 0;
 foreach $element (keys %IPHash)
@@ -113,14 +138,30 @@ $Output .= "<TR><TD><FONT FACE=sans,arial SIZE=2>Total Number of Visits</TD>" .
            "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$cnt_all</TD></TR>";
 $Output .= "<TR><TD><FONT FACE=sans,arial SIZE=2>Total Unique Visitors (by IP)</TD>" .
            "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$cnt_uniq</TD></TR>";
+$Output .= "</TABLE></TD><TD>";
+
+
+$Output .= "<TABLE STYLE='border:1px;border-style:solid;border-color:black'>";
+$Output .= "<TR><TD VALIGN=top><FONT FACE=sans,arial SIZE=2><I>Program Used:</I></TD>" .
+           "<TD><FONT FACE=sans,arial SIZE=2><I>No Visits</I></TD></TR>";
+foreach $element (keys %ProgramHash)
+  {  
+     $Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$element</TD>" .
+                "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$ProgramHash{$element}</TD></TR>";
+  }
 $Output .= "</TABLE>";
+
+$Output .= "</TD><TD>";
+$Output .= sprintf('<P><img src="data:image/png;base64,%s"><P>', encode_base64($myimage->png));
+
 $Output .= "</TD></TR></TABLE>";
 
 
 $Output .= "<P><TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
            "<TR><TD VALIGN=top COLSPAN=2><FONT FACE=sans,arial SIZE=4>" . 
-           "<B>Countries using ParticleStats:<P></B></TD></TR>";
+           "<B>Geolocation of ParticleStats Visitors:</B></TD></TR>";
 $Output .= "<TR><TD>";
+
 $Output .= "<TABLE STYLE='border:1px;border-style:solid;border-color:black'>";
 $Output .= "<TR><TD VALIGN=top><FONT FACE=sans,arial SIZE=2><I>Country</I></TD>" .
            "<TD><FONT FACE=sans,arial SIZE=2><I>No Visits</I></TD></TR>";
@@ -129,10 +170,23 @@ foreach $element (keys %Country)
      $Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$element</TD>" . 
                 "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$Country{$element}</TD></TR>";   
   }
-$Output .= "</TABLE>";
-$Output .= "</TD>";
+$Output .= "</TABLE></TD><TD>";
 
-$Output .= "<TD ALIGN=right VALIGN=top><IMG SRC=http://maps.google.com/maps/api/staticmap?center=London,UK&size=512x350&maptype=roadmap". $GeoLoc . "&sensor=false></TD></TR></TABLE>";
+$Output .= "<TABLE STYLE='border:1px;border-style:solid;border-color:black'>";
+$Output .= "<TR><TD VALIGN=top><FONT FACE=sans,arial SIZE=2><I>City</I></TD>" .
+           "<TD><FONT FACE=sans,arial SIZE=2><I>No Visits</I></TD></TR>";
+foreach $element (keys %City)
+  {  
+     $Output .= "<TR><TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$element</TD>" .
+                "<TD BGCOLOR=whitesmoke><FONT FACE=sans,arial SIZE=2>$City{$element}</TD></TR>";
+  }
+$Output .= "</TABLE>";
+
+$Output .= "</TD></TR>" .
+           "<TR><TD COLSPAN=2>" .
+           "<IMG SRC='PS_Out/map.png' WIDTH=750>";
+
+$Output .= "</TD></TR></TABLE>";
 
 #------------------------------------------------------------------------------
 # Print out the final HTML
@@ -146,46 +200,49 @@ $Webpage .= "<BODY>" .
             "<A HREF='http://www.ParticleStats.com'>" .
             "<IMG SRC='$webspace/Images/PS_Logo_Simple_100px.png' BORDER=0></A><BR>" .
             "<FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "<B>Open source software for the analysis of intracellular " .
-            "particle motility and cytoskeletal polarity</B>" .
-            "</TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "<B>By Russell S. Hamilton & Ilan Davis</B><BR>" .
-            "Department of Biochemistry, University of Oxford<P>" .
-            "Contact:<BR>&nbsp &nbsp Russell.Hamilton -at- bioch.ox.ac.uk<BR>" .
-            "&nbsp &nbsp <A HREF='http://www.ilandavis.com' " .
-            "STYLE='TEXT-DECORATION: NONE'>[www.ilandavis.com]</A>" .
-            "&nbsp &nbsp <A HREF='http://www.particlestats.com' " .
-            "STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>" .
-            "</TD></TR>" .
+            "<B>A suite of tools for the analysis, comparison, and optimization of tracking data</B>" .
+            "</TD><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black><B>By Russell S. Hamilton </B><BR>" .
+            "<A HREF='http://www.gen.cam.ac.uk' STYLE='TEXT-DECORATION: NONE'>" .
+            "Department of Genetics, University of Cambridge</A><BR>" .
+            "<A HREF='http://www.trophoblast.cam.ac.uk' STYLE='TEXT-DECORATION: NONE'>" .
+            "Centre for Trophoblast Research, University of Cambridge</A><P>" . 
+            "Contact:<BR>&nbsp &nbsp rsh46 -at- cam.ac.uk<BR>&nbsp &nbsp <A HREF='http://www.particlestats.com' " .
+            "STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A></TD></TR>" .
             "<TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "<A HREF='ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>" .
-            "<A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' " . 
-            "STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A>" .
-            "</TD></TR>" .
+            "<A HREF='$webspace/ParticleStats_Web.pl' STYLE='TEXT-DECORATION: NONE'>[HOME]</A>" .
+            "&nbsp<A HREF='https://github.com/darogan/ParticleStats' STYLE='TEXT-DECORATION: NONE'>[GitHub]</A>" . 
+            "&nbsp<A HREF='http://www.particlestats.com' STYLE='TEXT-DECORATION: NONE'>[www.particlestats.com]</A>" .
+            "&nbsp<A HREF='http://www.darogan.co.uk/ParticleStats/ParticleStats_UserGuide.pdf' " .
+            "STYLE='TEXT-DECORATION: NONE'>[ParticleStats_UserGuide.pdf]</A></TD></TR>" .
             "</TABLE>";
+
+$Webpage .= "<P><TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
+            "<TR><TD><FONT FACE='sans,arial' SIZE=2 COLOR=black>" . 
+            "<B>Data Collected at $date</B></FONT></TD></TR></TABLE>";
 
 $Webpage .= "<P>$Output<P>" .
 
             "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD COLSPAN=2 ALIGN=center><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
-            "Please cite: Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., " . 
+            "<TR><TD COLSPAN=2><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
+            "<B>Please cite:</B> Hamilton, R.S., Parton, R.M., Oliveira, R.A., Vendra, G., Ball, G., " . 
             "Nasmyth, K. & Davis, I. (2010) ParticleStats: open source software for the analysis " . 
             "of particle motility. <I>Nucl. Acids Res. Web Server Edition</I> " . 
             "<A HREF='http://dx.doi.org/10.1093/nar/GKQ542' STYLE='text-decoration: none;'>[DOI]</A>" .
             "</TD></TR></TABLE>" . "<P>" .
 
             "<TABLE WIDTH=800 STYLE='border:1px;border-style:dashed;border-color:grey'>" .
-            "<TR><TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>Open Source<BR>" .
-            "<A HREF='http://www.opensource.org/docs/definition.php'>" .
-            "<IMG SRC='http://opensource.org/trademarks/osi-certified/web/osi-certified-72x60.png' " .
-            "border=0 width=72 height=60></a></TD>" .
-            "<TD ALIGN=center><FONT FACE='sans,arial' SIZE=2>GNU License<BR>" .
-            "<A HREF='http://www.gnu.org'>" .
-            "<IMG SRC='$webspace/Images/heckert_gnu.small.png' HEIGHT=60  BORDER=0></A>" .
+            "<TR><TD COLSPAN=2 ALIGN=left><FONT FACE='sans,arial' SIZE=2 COLOR=black>" .
+            "<B>History:</B><BR>" .
+            "ParticleStats was originally created by Russell Hamilton and " .
+            "<A HREF='http://www.ilandavis.com' STYLE='TEXT-DECORATION: NONE'>Ilan Davis</A> at the " . 
+            "<A HREF='http://www.bioch.ox.ac.uk' STYLE='TEXT-DECORATION: NONE'>" . 
+            "Department of Biochemistry, University of Oxford</A> and in collaboration with the " . 
+            "<A HREF='http://www.micron.ox.ac.uk' STYLE='TEXT-DECORATION: NONE'>Micron Advanced Imaging Facility</A>." .
+            "<P><B>Contributions:</B><BR>Malwina Prater, Graeme Ball, Richard Parton, Alexandra Ashcroft, Ben Shaw" .
             "</TD></TR></TABLE>";
 $Webpage .= "</BODY></HTML>";
 
-print $Webpage;
+print $Webpage, "\n";
 
 #------------------------------------------------------------------------------
 # FIN
