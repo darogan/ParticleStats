@@ -8,13 +8,18 @@
 # ParticleStats #
 __Open source software for the analysis of particle motility and cytoskelteal polarity__
 
-ParticleStats was created by Russell Hamilton ([Centre for Trophoblast Research, University of Cambridge](http://www.trophoblast.cam.ac.uk)) and Ilan Davis ([Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) and in collaboration with the [Micron Advanced Imaging Facility](http://www.micron.ox.ac.uk).
+ParticleStats was originally created by Russell Hamilton ([Centre for Trophoblast Research, University of Cambridge](http://www.trophoblast.cam.ac.uk)) and Ilan Davis ([Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) and in collaboration with the [Micron Advanced Imaging Facility](http://www.micron.ox.ac.uk).
+
+ParticleStats2.0 is currently being developed by Russell Hamilton ([Dept Genetics, University of Cambridge](http://www.genetics.cam.ac.uk)) in collaboration with Anne Ferguson-Smith ([Dept Genetics, University of Cambridge](https://www.gen.cam.ac.uk/research-groups/research-groups/ferguson-smith)) and Ilan Davis ([Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) with new features for comparing tracking data, cell migration and behavioural assays
+
+
+
 
 ##### Project Page #####
 
 http://www.ParticleStats.com  
 
-If you have ideas or request for new features please submit them as issues.                              
+If you have ideas or request for new features please submit them as issues on the GitHub site.                              
 
 ##### Citation: #####
 
@@ -23,6 +28,17 @@ Hamilton, R.S., Parton, R.M., Oliveira, R.A., Ball, G., Vendra, G., Nasmyth, K. 
 ##### Abstract #####
 
 The study of dynamic cellular processes in living cells is central to biology and is particularly powerful when the motility characteristics of individual objects within cells can be determined and analysed statistically. However, commercial programs only offer a very limited range of inflexible analysis modules and there are currently no open source programs for extensive analysis of particle motility. Here, we describe ParticleStats (www.ParticleStats.com), a web server and open source programs, which input the X,Y co-ordinate positions of objects in time, and outputs novel analyses, graphical plots and statistics for motile objects. ParticleStats comprises three separate analysis programs. Firstly ParticleStats:Directionality, for the global analysis of polarity, for example microtubule plus end growth in Drosophila oocytes. Secondly, ParticleStats:Compare for the analysis of saltatory movement in terms of runs and pauses. This can be applied to chromosome segregation and molecular motor based movements. Thirdly, ParticleStats:Kymographs for the analysis of kymograph images, for example as applied to separation of chromosomes in mitosis. These analyses have provided key insights into molecular mechanisms that are not possible from qualitative analysis alone and are widely applicable to many other cell biology problems.
+
+##### ParticleStats::Modules #####
+
+| Module | Availability | Description |  
+| ------ | ------------ | ----------- |
+| `ParticleStats::Compare` | Since 1.0 | The dynamics of particle movement, such as in the case of motor driven transport, can be explored through the calculation of runs and pauses in the movement |
+| `ParticleStats::Directionality` | Since v1.0 | The directionality of a set of tracked particles is determined using directional statistics. The wind-maps are a novel way of visualising bias in the travel direction of particles. Further evidence is provided with rose diagrams and radial histograms |
+| `ParticleStats::Kymographs` | Since v1.0 | Analysis of the dynamics of separating kinetochores as displayed in kymographs |
+| `ParticleStats::TrackAlign` | New for v2.0 | Analysis and comparison of tracking data |
+| `ParticleStats::Behavioural` | New for v2.0 | Analysis of the dynamics of zebrafish movement in behavioural tracking experiments |
+| `ParticleStats::Cell` | Planned | Analysis of migrating cells |
 
 
 ##### Command Line Version #####
