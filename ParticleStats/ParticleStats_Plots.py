@@ -41,6 +41,7 @@
 import random
 import numpy as na
 import os,sys,math,re
+import csv
 #import Numeric
 import scipy
 #from ParticleStats_Maths import *
@@ -1292,12 +1293,9 @@ def PlotCompareRoseDiagram ( Runs,FinalIMSize,CoordsSet,Sheet,DirGraphs ):
 
 #------------------------------------------------------------------------------
 def PlotExperimentalDesign( Peturbations, TotalFrames ):
-
-	PlotName = "Dave"
-
-	print Peturbations[5]
-	print TotalFrames
-
+#
+# Some basic plots to visualise the experimental design vs time
+#
 	i = 0
 	FramesPre    = []
 	FramesSta    = []
@@ -1312,19 +1310,17 @@ def PlotExperimentalDesign( Peturbations, TotalFrames ):
 	while i < len(Peturbations):
 		if((Peturbations[i][6] == "PreStartle")  and (int(Peturbations[i][5]) <= 10)):
 			FramesPre.append( Peturbations[i][2] )
-			MagnitudePre.append( 1 )
+			MagnitudePre.append( 0.5 )
 		if((Peturbations[i][6] == "Startle")     and (int(Peturbations[i][5]) <= 10)):
 			FramesSta.append( Peturbations[i][2] )
 			MagnitudeSta.append( 1 )
 		if((Peturbations[i][6] == "PostStartle") and (int(Peturbations[i][5]) <= 10)):
 			FramesPos.append( Peturbations[i][2] )
-			MagnitudePos.append( 1 )
+			MagnitudePos.append( 0.5 )
 		if((Peturbations[i][6] == "PreStartle")  and (int(Peturbations[i][5]) == 1)):
 			FramesLabels.append( Peturbations[i][2] )
-			MagnitudeLabels.append( 1 )
+			MagnitudeLabels.append( 0.5 )
 		i += 1
-
-	print int(FramesPre[0]), " to ", int(FramesPos[9])
 
 	figure()
 	stem(FramesPre,MagnitudePre, linefmt='g-', markerfmt='', linewidth=0.1, BaseValue=0)
@@ -1367,7 +1363,58 @@ def PlotExperimentalDesign( Peturbations, TotalFrames ):
 	grid(True)
 	savefig('GraphOutput/ExperimentalDesignFirst.png')
 
+	PlotName = ['GraphOutput/ExperimentalDesign.png', \
+                'GraphOutput/ExperimentalDesignZoom.png',\
+                'GraphOutput/ExperimentalDesignFirst.png']
+
 	return PlotName
+
+#------------------------------------------------------------------------------
+def PerturbationPlots( Arena_Perturb_Coords, ArenaNum, CoordNum, ResultsDir ):
+
+	PerturbSummary = []
+	with open(str(ResultsDir)+'/'+str(ResultsDir)+'_'+'perturb_test_arena_'+str(ArenaNum)+'.csv','w') as perturb_csv:
+		perturb_csv_writer = csv.writer(perturb_csv, delimiter=',', lineterminator='\n')
+		perturb_csv_writer.writerow(['CoordNum','ArenaNum','CoordCount', 'EventType', \
+                                     'EventNum', 'PointDistance','CummulativeDistance','X','Y']) 
+
+		Distance        = 0
+		CummulativeDist = 0
+		CoordCount      = 0
+		i = 1
+		while i < len(Arena_Perturb_Coords):
+
+			if( (Arena_Perturb_Coords[i][0] != Arena_Perturb_Coords[i-1][0]) or \
+   	         (Arena_Perturb_Coords[i][1] != Arena_Perturb_Coords[i-1][1])):
+				Distance        = 0
+				CummulativeDist = 0
+				CoordCount      = 0
+
+			Distance = abs(PS_Maths.Calculate2PointsDistance(\
+                       Arena_Perturb_Coords[i][2][4],  Arena_Perturb_Coords[i][2][5],\
+                       Arena_Perturb_Coords[i-1][2][4],Arena_Perturb_Coords[i-1][2][5]))
+			CummulativeDist += Distance
+
+			DataLine = [int(i+CoordNum), ArenaNum, CoordCount,\
+                        Arena_Perturb_Coords[i][0], Arena_Perturb_Coords[i][1], \
+                        Distance, CummulativeDist, \
+                        Arena_Perturb_Coords[i][2][4],  Arena_Perturb_Coords[i][2][5]]
+
+			#perturb_csv_writer.writerow([i, ArenaNum, CoordCount,\
+            #                             Arena_Perturb_Coords[i][0], Arena_Perturb_Coords[i][1], \
+            #                             Distance, CummulativeDist, \
+            #                             Arena_Perturb_Coords[i][2][4],  Arena_Perturb_Coords[i][2][5]])
+
+			perturb_csv_writer.writerow( DataLine )
+			PerturbSummary.append( DataLine )
+
+			CoordCount += 1
+
+			i += 1
+
+	perturb_csv.close()
+
+	return PerturbSummary
 
 #------------------------------------------------------------------------------
 def PlotDirectionTable ( TrailVectors ):
@@ -2166,8 +2213,6 @@ def PlotDistanceVsTimeCummulativeBehavioural(Coords,Sheet,Num,Name,TimeUnits,\
                 Dist.append(Distance/TimeFactor)
                 Time.append(Timey)
 
-                if(j < 5):
-                    print j, " --- ", str(Distance), ",", str(Timey)
                 j += 1
 
         if(makePlot):

@@ -43,6 +43,8 @@ import os,sys
 from PIL import Image, ImageDraw, ImageColor
 import glob
 import re
+#from datetime import datetime
+#from dateutil import parser
 
 #------------------------------------------------------------------------------
 def Colourer (Word, Colour, Mode, Weight,Size):
@@ -133,30 +135,16 @@ def DrawExcelCoords (FileNames,Coords,Stem,Colours):
 def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
                           Regression,DirGraphs,errorLimit):
 
-#	im = Image.open(FileName).convert('RGBA')
 	im = Image.new('RGBA',(1200, 800))
-	#png_info = im.info
 	print "Scale=", Scale
 	Scale = float(Scale)
-	#print(im.info, im.format, im.size, im.mode)
 
-#	datas = im.getdata()
-#	newData = []
-#	for item in datas:
-#		newData.append(item)
-#	im.putdata(newData)
-
-
-	#im = Image.open(FileName)
 	draw = ImageDraw.Draw(im)
 
 	modulo = ((ParticleNo+1)%6)
 	if(modulo == 0): modulo = 6
 
 	x = 17.5 + (modulo * 85) + (modulo*2)
-	#if(modulo > 2): x = x - 5
-	#if(modulo == 6): x = x + 5
-
 	y = 50
 
 	if(ParticleNo < 6):                       y += 45  + 6
@@ -181,8 +169,8 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 	x_mean,x_geomean = PS_Maths.geo_mean( XCoords )
 	y_mean, y_geomean = PS_Maths.geo_mean( YCoords )
 
-	print "x_mean=", x_mean, " x_geomean=", x_geomean
-	print "y_mean=", y_mean, " y_geomean=", y_geomean
+	print "x_mean    | y_mean       = %6.2f | %6.2f" % (x_mean,    y_mean)
+	print "x_geomean | y_geomean    = %6.2f | %6.2f" % (x_geomean, y_geomean)
 
 	convexhullPolygon   = PS_Maths.ConvexHull_Points(points)
 	convexhullPerimeter = PS_Maths.Polygon_Perimeter(convexhullPolygon)
@@ -199,7 +187,8 @@ def DrawTrailsOnImageFile(FileName,ParticleNo,CoordsSet,Colour,Coords,Scale,
 	smallestEnclosingCircle = PS_Maths.make_circle(points)
 
 
-	print "smallestEnclosingCircle  = ", smallestEnclosingCircle
+	print "smallestEnclosingCircle  = (%6.2f, %6.2f, %6.2f)" % \
+          (smallestEnclosingCircle[0],smallestEnclosingCircle[1],smallestEnclosingCircle[2])
 	errorRadius = math.fabs( 1 - ( smallestEnclosingCircle[2] / radius) )
 	print "Circle Radius            = %8.2f [error=%6.2f]" % (smallestEnclosingCircle[2], errorRadius)
 	print "ConvexHull Polygon (len) = %8.2f"               % len(convexhullPolygon)
@@ -1015,7 +1004,7 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 	ExptData     = []
 	Corrections  = []
 	Axes         = []
-	Peturbations = []
+	Perturbations = []
 	TotalFrames  = 0
 
 	count = 0
@@ -1034,6 +1023,7 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 		print "PS.Inputs: ImageName,ImagePlane,Arena,X,Y,Zone,Distance,Segment"
 
 		for element in VibTestFile:
+
 			if( (element[2] == "Arena") and ( element[4] == "Target_location")):
 				if( num < 10):
 					print "PS.Inputs: ",
@@ -1042,12 +1032,12 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 									element[8], element[10], element[12]])
 
 				if( (float(element[5]) >= 0) and (float(element[6]) >= 0)):
+					#(TSa,TSb) = parser.parse(str(element[0])).strftime('%Y-%m-%d %H:%M:%S.%f').split('.') 
+					#timestamp = datetime.strptime(str("%s.%03d" % (TSa, int(TSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
 					ExptData[ int(element[3])-1 ].append( [str(O_Name), int(ImagePlane), int(TimeInterval),
 														   float(element[3]),
 														   float(element[5]), float(element[6]), 
-														   int(LineNumber), int(num) ] )
-					#									   float(element[8]), float(element[10]),
-					#									   float(element[12]) ] )
+														   int(LineNumber), int(num), str(element[0]) ] )
 
 				if(int(element[3]) == 24):
 					ImagePlane += 1
@@ -1055,39 +1045,33 @@ def ReadVibtest_SingleFile (CsvFile, TimeInterval, NumArenas):
 
 			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and 
 				  (element[7] == "PreStartle") and (int(element[6]) <= 10) ):	
-				#print "Prestartle,",
-				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
-				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+				#(TSa,TSb) = parser.parse(str(element[0])).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+				#timestamp = datetime.strptime(str("%s.%03d" % (TSa, int(TSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+				Perturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
                                        int(element[5]), int(element[6]), str(element[7]) ]  )
 				
 			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and 
 				  (element[7] == "Startle") and (int(element[6]) <= 10) ):
-				#print "Startle,", 
-				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
-				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+				#(TSa,TSb) = parser.parse(str(element[0])).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+				#timestamp = datetime.strptime(str("%s.%03d" % (TSa, int(TSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+				Perturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
                                        int(element[5]), int(element[6]), str(element[7]) ]  )
+
 			elif( (len(element) >= 12) and (element[4] == "ARENA_DISTANCES") and   
                   (element[7] == "PostStartle") and (int(element[6]) <= 10) ):
-				#print "PostStartle,", 
-				#print ',' . join([O_Name, str(num), str(ImagePlane), element[0], element[5], element[6], element[7] ])
-				Peturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
+				#(TSa,TSb) = parser.parse(str(element[0])).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+				#timestamp = datetime.strptime(str("%s.%03d" % (TSa, int(TSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+				Perturbations.append( [ str(O_Name), int(num), int(ImagePlane), str(element[0]), 
                                        int(element[5]), int(element[6]), str(element[7]) ]  )
 
 			LineNumber += 1
 
 		TotalFrames = ImagePlane
 
-#	for i in range(len(ExptData)):
-#
-#		for j in range(len(ExptData[i])):
-#			if(ExptData[i][j][1] == 1):
-#			#if( j == 1):
-#				print("PS.Inputs: ", i,j, ExptData[i][j])
-
 	if len(Corrections) < 1: Corrections = [99,99,99,99]
-	if len(Axes) < 1:    Axes        = [99,99,99,99] #[100,120,100,100] #[99,99,199,99]
+	if len(Axes) < 1:        Axes        = [99,99,99,99] #[100,120,100,100] #[99,99,199,99]
 
-	return ExptData, Corrections, Axes, Peturbations, TotalFrames
+	return ExptData, Corrections, Axes, Perturbations, TotalFrames
 
 #------------------------------------------------------------------------------
 # FIN

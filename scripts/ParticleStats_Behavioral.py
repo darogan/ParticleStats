@@ -38,8 +38,12 @@
 
 import os, sys, math
 import os.path
+import csv
+import numpy as np
+import pandas as pd
 from optparse import OptionParser
-
+from datetime import datetime
+from dateutil import parser as dsparser
 
 ###############################################################################
 # PARSE IN THE USER OPTIONS 
@@ -185,15 +189,95 @@ while coordset < len(FDs):
 	RunCounter            = 0; 
 
 	# Lets look at the experimental design
-	print "+ There are ", len(FDs[coordset]['Perturbations']), " peturbation events in the experiment"
+	print "+ There are ", len(FDs[coordset]['Perturbations']), " perturbation events in the experiment"
+	Perturbations         = FDs[coordset]['Perturbations']
+	minCyclePerturbations = min([_[4] for _ in Perturbations])
+	maxCyclePerturbations = max([_[4] for _ in Perturbations])
+	minEventPerturbations = min([_[5] for _ in Perturbations]) 
+	maxEventPerturbations = max([_[5] for _ in Perturbations])
+	print "Perturbations Cycle min ", minCyclePerturbations, " max ", maxCyclePerturbations
+	print "Perturbations Event min ", minEventPerturbations, " max ", maxEventPerturbations
+
+	Perturbs = []
+
+	i = 0
+	while i < len(Perturbations):
+		j = 1
+		while j <= maxCyclePerturbations:
+		
+			if((Perturbations[i][4] == j) and (Perturbations[i][5] == minEventPerturbations)):
+				#print Perturbations[i][6], "from:", Perturbations[i][2], "[", Perturbations[i][3], "]",
+		
+				(sTSa,sTSb) = dsparser.parse(Perturbations[i][3]).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+				sTS         = datetime.strptime(str("%s.%03d" % (sTSa, int(sTSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+
+			if((Perturbations[i][4] == j) and (Perturbations[i][5] == maxEventPerturbations)):
+
+				(eTSa,eTSb) = dsparser.parse(Perturbations[i][3]).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+				eTS         = datetime.strptime(str("%s.%03d" % (eTSa, int(eTSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+				duration    = eTS - sTS
+
+				#print "to:", Perturbations[i][2], "[", Perturbations[i][3], "]",
+				#print "duration: ", duration, "[", duration.total_seconds(), "]"
+
+				Perturbs.append( [ Perturbations[i][6], j-1, sTS, eTS, duration ] )
+			j += 1
+		i += 1
+
 	ExptPlotName = PS_Plots.PlotExperimentalDesign(FDs[coordset]['Perturbations'], FDs[coordset]['TotalFrames'])
 	print "ExptPlotName = ", ExptPlotName
-	sys.exit()
+
+	#Pertub_CummulativeDistanceTable = []
+	Pertub_CummulativeDistanceTable = pd.DataFrame()
 
 	i = 0
 	while i < len(FDs[coordset]['Coords']): #cycle through sheets
 
-		print "Sheet: ", int(i+1), " ", len(FDs[coordset]['Coords'][i])
+		print "Num coords = ", len(FDs[coordset]['Coords'][0])
+
+		Arena_Perturb_Coords = []
+		j = 0
+		while j < len(FDs[coordset]['Coords'][i]): #cycle through       
+
+			(TSa,TSb) = dsparser.parse(str(FDs[coordset]['Coords'][i][j][-1])).strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+			timestamp = datetime.strptime(str("%s.%03d" % (TSa, int(TSb) / 1000)), '%Y-%m-%d %H:%M:%S.%f')
+
+			#print "Timestamp = ", timestamp, " (", FDs[coordset]['Coords'][i][0][-1], ")"
+			#print "test prestartle=", Perturb_PreStartle[0][1]
+			#print "test duration=", (Perturb_PreStartle[0][1]-timestamp).total_seconds()
+			#print "ts.time =", timestamp.time()
+			#print "pre.time=", Perturb_PreStartle[0][1].time()
+
+			k = 0
+			while k < len(Perturbs):
+
+				if((timestamp.time() >= Perturbs[k][2].time()) and \
+                   (timestamp.time() <= Perturbs[k][3].time())):
+					#print Perturbs[k][0], "#:", k+1, "ts=",timestamp.time(), \
+					#	  ",pre=",Perturbs[k][2].time(), \
+					#	  ", coord=",FDs[coordset]['Coords'][i][j]
+					Arena_Perturb_Coords.append( [ Perturbs[k][0], Perturbs[k][1], FDs[coordset]['Coords'][i][j] ] )
+				k += 1
+			j += 1
+
+
+
+		# Do something with perturb coords (PLOTS)
+		print "Perturbation Summary Tables..."
+
+		PerturbTab     = PS_Plots.PerturbationPlots(Arena_Perturb_Coords, i+1, 
+                                                    len(Pertub_CummulativeDistanceTable),str(options.OutputDir))
+		PerturbTab_pd  = pd.DataFrame(PerturbTab, columns = ["CoordNum", "ArenaNum", "CoordCount", "EventType", \
+                                                             "EventNum", "PointDistance", "CummulativeDistance", "X", "Y"])
+		PerturbTab_agg = PerturbTab_pd.groupby(["ArenaNum", "EventType","EventNum"])['CummulativeDistance'].max().reset_index()
+		print PerturbTab_agg
+		Pertub_CummulativeDistanceTable = pd.concat( [Pertub_CummulativeDistanceTable, PerturbTab_agg] )
+		print len(Pertub_CummulativeDistanceTable)
+
+
+
+
+		print "Arena: ", int(i+1), " ", len(FDs[coordset]['Coords'][i])
 
 		print "Trail:"
 		print "\t", FDs[coordset]['Coords'][i][0]
@@ -202,7 +286,6 @@ while coordset < len(FDs):
 
 		options.trails      = 1
 		Regression          = 0
-		#ImageFileSearchPath = "/storage/Russell/Hackathon/zebrafish/Exp_1_170525/"
 		ImageFileSearchPath = options.ImageSearchPath
 		# Perform Trail drawing
 		IMG_Trails = ""
@@ -222,13 +305,12 @@ while coordset < len(FDs):
                                      FDs[coordset]['Coords'][i],\
                                      options.PixelRatio,Regression,options.OutputDir,0.1)
 
-		j = 0
-		while j < len(FDs[coordset]['Coords'][i]): #cycle through       
-                
-			if(j < 5):    
-				print "\t", j, "\t",  FDs[coordset]['Coords'][i][j]
-
-			j += 1
+		#j = 0
+		#while j < len(FDs[coordset]['Coords'][i]): #cycle through       
+        #        
+		#	if(j < 5):    
+		#		print "\t", j, "\t",  FDs[coordset]['Coords'][i][j]
+		#	j += 1
 
 		# Perform Cummulative Distance plotting 
 		#options.graphs = 0
@@ -238,7 +320,24 @@ while coordset < len(FDs):
                                                         500000, 1000,
 														DirGraphs, options.graphs)
 		print "TotalDistance, "+ImageFileSearchPath+", "+str(i+1)+", "+str(Distance)
+
 		i += 1
+
+	print Pertub_CummulativeDistanceTable
+	print Pertub_CummulativeDistanceTable.reset_index()
+
+	Peturb_CSV_File = str(options.OutputDir)+'/'+str(options.OutputDir)+'_'+'perturb_test_arena_All'+'.csv'
+	print "Writing to:", Peturb_CSV_File
+	Pertub_CummulativeDistanceTable.to_csv(Peturb_CSV_File, sep=",", index=True)
+
+	#with open(str(options.OutputDir)+'/'+str(options.OutputDir)+'_'+'perturb_test_arena_All'+'.csv','w') as perturb_csv:
+	#	perturb_csv_writer = csv.writer(perturb_csv, delimiter=',', lineterminator='\n')
+	#	perturb_csv_writer.writerow(['CoordNum','ArenaNum','CoordCount', 'EventType', \
+    #                                 'EventNum', 'PointDistance','CummulativeDistance','X','Y'])
+
+	#	perturb_csv_writer.writerow( Pertub_CummulativeDistanceTable.reset_index() )
+	#	perturb_csv.close()
+
 
 	coordset += 1
 
