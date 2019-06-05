@@ -6,6 +6,7 @@
     |_|   \__,_|_|   \__|_|\___|_|\___|____/ \__\__,_|\__|___/            
 
 # ParticleStats #
+
 __Open source software for the analysis of particle motility and cytoskelteal polarity__
 
 ParticleStats was originally created by Russell Hamilton ([Centre for Trophoblast Research, University of Cambridge](http://www.trophoblast.cam.ac.uk)) and Ilan Davis ([Department of Biochemistry, University of Oxford](http://www.bioch.ox.ac.uk/research/davis)) and in collaboration with the [Micron Advanced Imaging Facility](http://www.micron.ox.ac.uk).
